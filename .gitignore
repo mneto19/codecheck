@@ -1,3 +1,23 @@
-.claude/
+# Dependências
 node_modules/
+
+# Variáveis de ambiente
 .env
+.env.local
+.env.*.local
+
+# Build
+dist/
+build/
+
+# Logs
+*.log
+logs/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
