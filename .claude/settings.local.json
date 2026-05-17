@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\manue\\\\Desktop\\\\Projeto Final\\\\backend\\\\src\" -Recurse -File | Where-Object {$_.Length -eq 0} | Select-Object FullName)"
+    ]
+  }
+}

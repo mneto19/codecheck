@@ -1,0 +1,76 @@
+import axios from "axios";
+
+const API_BASE = import.meta.env.VITE_API_URL
+  ? `${import.meta.env.VITE_API_URL}/api`
+  : "/api";
+
+const api = axios.create({
+  baseURL: API_BASE,
+  timeout: 30000,
+});
+
+api.interceptors.request.use((config) => {
+  if (!config.headers.Authorization) {
+    const token = localStorage.getItem("token") || sessionStorage.getItem("studentToken");
+    if (token) config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+api.interceptors.response.use(
+  (res) => res,
+  (err) => {
+    if (err.response?.status === 401) {
+      const isStudentRoute = window.location.pathname.startsWith("/exam");
+      if (!isStudentRoute) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        window.location.href = "/login";
+      }
+    }
+    return Promise.reject(err);
+  }
+);
+
+export const authApi = {
+  register: (data) => api.post("/auth/register", data),
+  login: (data) => api.post("/auth/login", data),
+  me: () => api.get("/auth/me"),
+};
+
+export const roomApi = {
+  create: (data) => api.post("/rooms", data),
+  list: () => api.get("/rooms"),
+  get: (id) => api.get(`/rooms/${id}`),
+  delete: (id) => api.delete(`/rooms/${id}`),
+  start: (id) => api.post(`/rooms/${id}/start`),
+  finish: (id) => api.post(`/rooms/${id}/finish`),
+};
+
+export const questionApi = {
+  create: (data) => api.post("/questions", data),
+  update: (id, data) => api.put(`/questions/${id}`, data),
+  delete: (id) => api.delete(`/questions/${id}`),
+};
+
+export const studentApi = {
+  join: (data) => api.post("/students/join", data),
+  getRoom: (code) => api.get(`/students/room/${code}`),
+};
+
+export const submissionApi = {
+  submit: (data) => {
+    const token = sessionStorage.getItem("studentToken");
+    return api.post("/submissions", data, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  },
+};
+
+export const resultsApi = {
+  getRoom: (roomId) => api.get(`/results/room/${roomId}`),
+  getSubmission: (id) => api.get(`/results/submission/${id}`),
+  analyze: (roomId) => api.post(`/results/room/${roomId}/analyze`),
+};
+
+export default api;

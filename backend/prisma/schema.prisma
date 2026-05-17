@@ -1,0 +1,113 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  name         String
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  rooms Room[]
+
+  @@map("users")
+}
+
+model Room {
+  id           String     @id @default(uuid())
+  code         String     @unique // 6-char alphanumeric code like Kahoot
+  name         String
+  teacherId    String     @map("teacher_id")
+  timerSeconds Int        @map("timer_seconds")
+  status       RoomStatus @default(WAITING)
+  startedAt    DateTime?  @map("started_at")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+
+  teacher   User       @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  questions Question[]
+  students  Student[]
+
+  @@map("rooms")
+}
+
+enum RoomStatus {
+  WAITING  // Room created, waiting for students
+  ACTIVE   // Exam running, timer started
+  FINISHED // Timer ended, no more submissions
+}
+
+model Question {
+  id            String   @id @default(uuid())
+  roomId        String   @map("room_id")
+  promptText    String   @map("prompt_text")
+  referenceCode String   @map("reference_code")
+  language      Language
+  orderIndex    Int      @map("order_index")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  referenceOutput String?  @map("reference_output")
+
+  room        Room         @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  submissions Submission[]
+
+  @@map("questions")
+}
+
+enum Language {
+  PYTHON
+  JAVASCRIPT
+  JAVA
+  C
+  CPP
+  CSHARP
+}
+
+model Student {
+  id            String   @id @default(uuid())
+  roomId        String   @map("room_id")
+  nickname      String
+  studentNumber String?  @map("student_number")
+  joinedAt      DateTime @default(now()) @map("joined_at")
+
+  room        Room         @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  submissions Submission[]
+
+  @@unique([roomId, nickname])
+  @@map("students")
+}
+
+model Submission {
+  id                   String   @id @default(uuid())
+  questionId           String   @map("question_id")
+  studentId            String   @map("student_id")
+  studentCode          String   @map("student_code")
+  executionOutput      String?  @map("execution_output")
+  executionError       String?  @map("execution_error")
+  executionStatus      String?  @map("execution_status")
+  aiCorrectnessScore   Int?     @map("ai_correctness_score")
+  aiLogicDifferences   Json?    @map("ai_logic_differences")
+  aiStyleNotes         Json?    @map("ai_style_notes")
+  aiSummary            String?  @map("ai_summary")
+  aiGeneratedByAi      Boolean? @map("ai_generated_by_ai")
+  aiCertaintyDegree    Int?     @map("ai_certainty_degree")
+  aiReason             String?  @map("ai_reason")
+  submittedAt          DateTime @default(now()) @map("submitted_at")
+
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  student  Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([questionId, studentId]) // one submission per question per student
+  @@map("submissions")
+}
