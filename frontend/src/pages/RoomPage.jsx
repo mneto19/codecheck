@@ -313,7 +313,12 @@ export default function RoomPage() {
             <div className="flex flex-col gap-2">
               {students.map((s) => (
                 <div key={s.id} className="bg-ink-800 rounded-lg px-3 py-2.5 flex items-center justify-between">
-                  <span className="font-mono text-sm text-ink-200">{s.nickname}</span>
+                  <span className="font-mono text-sm text-ink-200">
+                    {s.nickname}
+                    {s.studentNumber && (
+                      <span className="text-ink-500 text-xs ml-2">#{s.studentNumber}</span>
+                    )}
+                  </span>
                   {/* Pontos coloridos representam o estado de cada submissão */}
                   <div className="flex gap-1">
                     {room.questions?.map((q) => {
