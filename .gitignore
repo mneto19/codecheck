@@ -21,3 +21,12 @@ Thumbs.db
 # Editor
 .vscode/
 .idea/
+
+# Certificados e chaves
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Env de produção (nunca commitar)
+.env.production
