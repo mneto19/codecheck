@@ -309,7 +309,7 @@ export default function LandingPage() {
         />
 
         {/* Content */}
-        <div className="relative z-10 max-w-3xl mx-auto text-center flex flex-col items-center gap-6">
+        <div className="relative z-10 max-w-3xl mx-auto text-center flex flex-col items-center gap-8">
           {/* Pill */}
           <div
             className="anim-up grad-pill inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-mono text-ink-400"
@@ -321,7 +321,7 @@ export default function LandingPage() {
 
           {/* Headline */}
           <h1
-            className="anim-up font-display text-5xl sm:text-6xl lg:text-7xl font-extrabold leading-[1.1] tracking-tight"
+            className="anim-up font-display text-5xl sm:text-6xl lg:text-7xl font-extrabold leading-[1.18] tracking-tight"
             style={{ animationDelay: '0.2s' }}
           >
             Avaliação de código,
@@ -389,9 +389,9 @@ export default function LandingPage() {
       {/* ── Features ────────────────────────────────────────────────────── */}
       <section id="funcionalidades" className="py-24 px-6">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-14">
-            <p className="text-xs font-mono text-ink-500 uppercase tracking-widest mb-3">Funcionalidades</p>
-            <h2 className="font-display text-3xl sm:text-4xl font-extrabold leading-tight">
+          <div className="text-center mb-16">
+            <p className="text-xs font-mono text-ink-500 uppercase tracking-widest mb-5">Funcionalidades</p>
+            <h2 className="font-display text-3xl sm:text-4xl font-extrabold leading-[1.2]">
               Tudo o que precisas,
               <br />
               <GradText>sem fricção.</GradText>
@@ -408,9 +408,9 @@ export default function LandingPage() {
       {/* ── How it works ────────────────────────────────────────────────── */}
       <section id="como-funciona" className="py-24 px-6 bg-ink-900">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-14">
-            <p className="text-xs font-mono text-ink-500 uppercase tracking-widest mb-3">Como funciona</p>
-            <h2 className="font-display text-3xl sm:text-4xl font-extrabold leading-tight">
+          <div className="text-center mb-16">
+            <p className="text-xs font-mono text-ink-500 uppercase tracking-widest mb-5">Como funciona</p>
+            <h2 className="font-display text-3xl sm:text-4xl font-extrabold leading-[1.2]">
               Simples para todos,
               <br />
               <GradText>poderoso para professores.</GradText>
@@ -454,7 +454,7 @@ export default function LandingPage() {
           style={{ background: 'radial-gradient(ellipse 80% 60% at 50% 50%, rgba(168,85,247,0.06) 0%, transparent 70%)' }}
         />
         <div className="relative z-10 max-w-xl mx-auto text-center flex flex-col items-center gap-5">
-          <h2 className="font-display text-3xl sm:text-4xl font-extrabold">
+          <h2 className="font-display text-3xl sm:text-4xl font-extrabold leading-[1.2]">
             Pronto para começar?
           </h2>
           <p className="text-ink-400 text-base">

@@ -177,7 +177,7 @@ export default function ResultsPage() {
                           P{i + 1}
                         </th>
                       ))}
-                      <th className="text-center px-4 py-3 text-[#00ff87] font-normal">Média</th>
+                      <th className="text-center px-4 py-3 text-[#00c8ff] font-normal">Média</th>
                       <th className="text-center px-4 py-3 text-warn font-normal">IA?</th>
                     </tr>
                   </thead>
@@ -197,7 +197,7 @@ export default function ResultsPage() {
                             return (
                               <td key={q.id} className="px-4 py-3 text-center">
                                 {score !== null ? (
-                                  <span className={`font-bold ${score >= 70 ? "text-[#00ff87]" : score >= 40 ? "text-warn" : "text-danger"}`}>
+                                  <span className={`font-bold ${score >= 70 ? "text-[#00c8ff]" : score >= 40 ? "text-warn" : "text-danger"}`}>
                                     {score}
                                   </span>
                                 ) : (
@@ -208,7 +208,7 @@ export default function ResultsPage() {
                           })}
                           <td className="px-4 py-3 text-center">
                             {avg !== null ? (
-                              <span className={`font-bold text-base ${avg >= 70 ? "text-[#00ff87]" : avg >= 40 ? "text-warn" : "text-danger"}`}>
+                              <span className={`font-bold text-base ${avg >= 70 ? "text-[#00c8ff]" : avg >= 40 ? "text-warn" : "text-danger"}`}>
                                 {avg}
                               </span>
                             ) : <span className="text-ink-600">—</span>}
@@ -248,7 +248,7 @@ export default function ResultsPage() {
                 onClick={() => { setSelected(s); setSubDetail(null); }}
                 className={`w-full text-left bg-ink-800 border rounded-xl px-4 py-3 transition-all
                   ${isSelected
-                    ? "border-[#00ff87] bg-[#00ff87]/5"
+                    ? "border-[#00c8ff] bg-[#00c8ff]/5"
                     : "border-ink-700 hover:border-ink-500"}`}
               >
                 <div className="flex items-center justify-between">
@@ -260,7 +260,7 @@ export default function ResultsPage() {
                   </div>
                   {avg !== null ? (
                     <span className={`font-mono text-sm font-bold ${
-                      avg >= 70 ? "text-[#00ff87]" : avg >= 40 ? "text-warn" : "text-danger"
+                      avg >= 70 ? "text-[#00c8ff]" : avg >= 40 ? "text-warn" : "text-danger"
                     }`}>
                       {avg}
                     </span>
@@ -297,7 +297,7 @@ export default function ResultsPage() {
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
-                      <span className="text-xs font-mono text-[#00ff87] mb-1 block">
+                      <span className="text-xs font-mono text-[#00c8ff] mb-1 block">
                         Pergunta {sub.question.orderIndex + 1} &middot; {sub.question.language}
                       </span>
                       <p className="text-ink-200 text-sm leading-relaxed">{sub.question.promptText}</p>
@@ -320,8 +320,8 @@ export default function ResultsPage() {
               {loadingDetail && <Spinner />}
 
               {subDetail && (
-                <Card className="animate-fade-in border-[#00ff87]/30">
-                  <h3 className="font-mono text-sm text-[#00ff87] uppercase tracking-widest mb-4">
+                <Card className="animate-fade-in border-[#00c8ff]/30">
+                  <h3 className="font-mono text-sm text-[#00c8ff] uppercase tracking-widest mb-4">
                     Detalhe da submissão
                   </h3>
 
@@ -381,10 +381,10 @@ export default function ResultsPage() {
                       </pre>
                     </div>
                     <div>
-                      <p className="text-xs font-mono text-[#00ff87] mb-2 uppercase tracking-widest">
+                      <p className="text-xs font-mono text-[#00c8ff] mb-2 uppercase tracking-widest">
                         Output esperado (referência)
                       </p>
-                      <pre className="bg-ink-900 rounded-lg px-4 py-3 text-[#00ff87] text-xs font-mono whitespace-pre-wrap min-h-12">
+                      <pre className="bg-ink-900 rounded-lg px-4 py-3 text-[#00c8ff] text-xs font-mono whitespace-pre-wrap min-h-12">
                         {subDetail.referenceOutput || "(não calculado — clica Re-analisar IA)"}
                       </pre>
                     </div>

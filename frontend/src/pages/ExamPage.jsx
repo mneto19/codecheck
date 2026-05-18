@@ -135,7 +135,7 @@ export default function ExamPage() {
     remaining === null ? "text-ink-400" :
     remaining < 120 ? "text-danger" :
     remaining < 300 ? "text-warn" :
-    "text-[#00ff87]";
+    "text-[#00c8ff]";
 
   return (
     <div className="min-h-screen bg-ink-950 flex flex-col">
@@ -143,7 +143,7 @@ export default function ExamPage() {
       <header className="border-b border-ink-800 px-6 py-3 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3">
           <span className="font-display font-bold text-white">
-            Code<span className="text-[#00ff87]">Check</span>
+            Code<span className="text-[#00c8ff]">Check</span>
           </span>
           <span className="text-ink-700">|</span>
           <span className="font-mono text-sm text-ink-300">{room.name}</span>
@@ -185,12 +185,12 @@ export default function ExamPage() {
       {/* Estado: à espera de início */}
       {isWaiting ? (
         <div className="flex-1 flex flex-col items-center justify-center gap-4">
-          <div className="pulse-acid w-4 h-4 rounded-full bg-[#00ff87]" />
+          <div className="pulse-acid w-4 h-4 rounded-full bg-[#00c8ff]" />
           <p className="font-mono text-ink-300 text-lg">
             A aguardar que o professor inicie o exame...
           </p>
           <p className="font-mono text-ink-600 text-sm">
-            Sala: <span className="text-[#00ff87]">{room.code}</span>
+            Sala: <span className="text-[#00c8ff]">{room.code}</span>
           </p>
         </div>
       ) : isFinished ? (
@@ -218,11 +218,11 @@ export default function ExamPage() {
                   onClick={() => setActiveQuestion(i)}
                   className={`text-left px-3 py-2.5 rounded-lg text-sm font-mono transition-all flex items-center justify-between
                     ${activeQuestion === i
-                      ? "bg-[#00ff87]/10 text-[#00ff87] border border-[#00ff87]/30"
+                      ? "bg-[#00c8ff]/10 text-[#00c8ff] border border-[#00c8ff]/30"
                       : "text-ink-400 hover:text-ink-200 hover:bg-ink-800"}`}
                 >
                   <span>Pergunta {i + 1}</span>
-                  {submitted && <span className="w-2 h-2 rounded-full bg-[#00ff87] shrink-0" />}
+                  {submitted && <span className="w-2 h-2 rounded-full bg-[#00c8ff] shrink-0" />}
                 </button>
               );
             })}
@@ -234,7 +234,7 @@ export default function ExamPage() {
               {/* Enunciado da pergunta */}
               <div className="border-b border-ink-800 px-6 py-4 shrink-0">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xs font-mono text-[#00ff87] uppercase tracking-widest">
+                  <span className="text-xs font-mono text-[#00c8ff] uppercase tracking-widest">
                     Pergunta {activeQuestion + 1}
                   </span>
                   <span className="text-xs font-mono text-ink-600">
@@ -274,7 +274,7 @@ export default function ExamPage() {
                         Output do teu código &middot;{" "}
                         <span className={
                           ["Accepted", "Queued"].includes(results[currentQ.id].status)
-                            ? "text-[#00ff87]"
+                            ? "text-[#00c8ff]"
                             : "text-warn"
                         }>
                           {results[currentQ.id].status}

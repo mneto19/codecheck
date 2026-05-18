@@ -47,7 +47,7 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-ink-950">
       <header className="border-b border-ink-800 px-6 py-4 flex items-center justify-between">
         <h1 className="font-display text-xl font-bold text-white">
-          Code<span className="text-[#00ff87]">Check</span>
+          Code<span className="text-[#00c8ff]">Check</span>
         </h1>
         <div className="flex items-center gap-4">
           <span className="text-ink-400 text-sm font-mono">{user?.name}</span>
@@ -81,7 +81,7 @@ export default function DashboardPage() {
                   </label>
                   <input
                     className="bg-ink-700 border border-ink-600 rounded-lg px-4 py-2.5 text-ink-100 font-mono text-sm
-                      placeholder:text-ink-500 focus:outline-none focus:border-[#00ff87] transition-colors"
+                      placeholder:text-ink-500 focus:outline-none focus:border-[#00c8ff] transition-colors"
                     placeholder="ex: Prova Python - Turma A"
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -94,7 +94,7 @@ export default function DashboardPage() {
                   </label>
                   <select
                     className="bg-ink-700 border border-ink-600 rounded-lg px-4 py-2.5 text-ink-100 font-mono text-sm
-                      focus:outline-none focus:border-[#00ff87] transition-colors"
+                      focus:outline-none focus:border-[#00c8ff] transition-colors"
                     value={form.timerSeconds}
                     onChange={(e) => setForm({ ...form, timerSeconds: e.target.value })}
                   >
@@ -125,7 +125,7 @@ export default function DashboardPage() {
             {rooms.map((room) => (
               <Card key={room.id} className="flex items-center justify-between gap-4 py-4">
                 <div className="flex items-center gap-4">
-                  <div className="font-mono text-xl font-bold text-[#00ff87] bg-[#00ff87]/10 px-3 py-1.5 rounded-lg tracking-widest">
+                  <div className="font-mono text-xl font-bold text-[#00c8ff] bg-[#00c8ff]/10 px-3 py-1.5 rounded-lg tracking-widest">
                     {room.code}
                   </div>
                   <div>

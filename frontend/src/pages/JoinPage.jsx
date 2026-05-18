@@ -53,7 +53,7 @@ export default function JoinPage() {
       <div className="w-full max-w-md animate-fade-in">
         <div className="text-center mb-12">
           <h1 className="font-display text-5xl font-extrabold text-white tracking-tight">
-            Code<span className="text-[#00ff87]">Check</span>
+            Code<span className="text-[#00c8ff]">Check</span>
           </h1>
           <p className="text-ink-400 font-mono text-sm mt-2">
             Plataforma de avaliação de código
@@ -69,7 +69,7 @@ export default function JoinPage() {
               <input
                 autoFocus
                 className="w-full text-center text-4xl font-mono font-bold bg-ink-800 border-2 border-ink-600
-                  focus:border-[#00ff87] outline-none rounded-2xl px-6 py-5 text-white uppercase
+                  focus:border-[#00c8ff] outline-none rounded-2xl px-6 py-5 text-white uppercase
                   tracking-[0.3em] transition-colors placeholder:text-ink-600 placeholder:tracking-[0.2em]"
                 placeholder="XXXXXX"
                 maxLength={6}
@@ -84,14 +84,14 @@ export default function JoinPage() {
             </>
           ) : step === "nickname" ? (
             <>
-              <div className="flex items-center gap-3 bg-[#00ff87]/10 border border-[#00ff87]/30 rounded-xl px-5 py-3 w-full justify-center">
-                <span className="text-[#00ff87] font-mono text-xl font-bold tracking-widest">{code}</span>
+              <div className="flex items-center gap-3 bg-[#00c8ff]/10 border border-[#00c8ff]/30 rounded-xl px-5 py-3 w-full justify-center">
+                <span className="text-[#00c8ff] font-mono text-xl font-bold tracking-widest">{code}</span>
               </div>
               <p className="text-ink-300 font-mono text-sm text-center">Qual é o teu nome?</p>
               <input
                 autoFocus
                 className="w-full text-center text-2xl font-mono font-semibold bg-ink-800 border-2 border-ink-600
-                  focus:border-[#00ff87] outline-none rounded-2xl px-6 py-4 text-white
+                  focus:border-[#00c8ff] outline-none rounded-2xl px-6 py-4 text-white
                   transition-colors placeholder:text-ink-600"
                 placeholder="O teu nome"
                 maxLength={30}
@@ -111,8 +111,8 @@ export default function JoinPage() {
             </>
           ) : (
             <>
-              <div className="flex items-center gap-3 bg-[#00ff87]/10 border border-[#00ff87]/30 rounded-xl px-5 py-3 w-full justify-center">
-                <span className="text-[#00ff87] font-mono text-xl font-bold tracking-widest">{code}</span>
+              <div className="flex items-center gap-3 bg-[#00c8ff]/10 border border-[#00c8ff]/30 rounded-xl px-5 py-3 w-full justify-center">
+                <span className="text-[#00c8ff] font-mono text-xl font-bold tracking-widest">{code}</span>
                 <span className="text-ink-500 font-mono text-sm">·</span>
                 <span className="text-ink-300 font-mono text-sm">{nickname}</span>
               </div>
@@ -120,7 +120,7 @@ export default function JoinPage() {
               <input
                 autoFocus
                 className="w-full text-center text-2xl font-mono font-semibold bg-ink-800 border-2 border-ink-600
-                  focus:border-[#00ff87] outline-none rounded-2xl px-6 py-4 text-white
+                  focus:border-[#00c8ff] outline-none rounded-2xl px-6 py-4 text-white
                   transition-colors placeholder:text-ink-600"
                 placeholder="ex: 12345"
                 maxLength={20}

@@ -27,9 +27,15 @@ body {
 }
 
 @keyframes pulseAcid {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(0,255,135,0.3); }
-  50% { box-shadow: 0 0 0 8px rgba(0,255,135,0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0,200,255,0.35); }
+  50% { box-shadow: 0 0 0 8px rgba(0,200,255,0); }
 }
+
+.btn-grad {
+  background: linear-gradient(135deg, #00c8ff 0%, #a855f7 100%);
+  color: #fff;
+}
+.btn-grad:hover { filter: brightness(0.88); }
 
 .animate-fade-in { animation: fadeIn 0.35s ease forwards; }
 .pulse-acid { animation: pulseAcid 2s infinite; }

@@ -152,7 +152,7 @@ export default function RoomPage() {
   }
 
   // Cor do timer muda nos últimos 5 minutos
-  const timerColor = remaining < 300 ? "text-danger" : "text-[#00ff87]";
+  const timerColor = remaining < 300 ? "text-danger" : "text-[#00c8ff]";
 
   return (
     <div className="min-h-screen bg-ink-950">
@@ -220,7 +220,7 @@ export default function RoomPage() {
                   <textarea
                     rows={3}
                     className="bg-ink-700 border border-ink-600 rounded-lg px-4 py-2.5 text-ink-100 font-mono text-sm
-                      placeholder:text-ink-500 focus:outline-none focus:border-[#00ff87] resize-none transition-colors"
+                      placeholder:text-ink-500 focus:outline-none focus:border-[#00c8ff] resize-none transition-colors"
                     placeholder="Escreve uma função que..."
                     value={qForm.promptText}
                     onChange={(e) => setQForm({ ...qForm, promptText: e.target.value })}
@@ -233,7 +233,7 @@ export default function RoomPage() {
                   </label>
                   <select
                     className="bg-ink-700 border border-ink-600 rounded-lg px-4 py-2.5 text-ink-100 font-mono text-sm
-                      focus:outline-none focus:border-[#00ff87] transition-colors"
+                      focus:outline-none focus:border-[#00c8ff] transition-colors"
                     value={qForm.language}
                     onChange={(e) => setQForm({ ...qForm, language: e.target.value })}
                   >
@@ -276,7 +276,7 @@ export default function RoomPage() {
               <Card key={q.id} className="animate-fade-in">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
-                    <span className="text-xs font-mono text-[#00ff87] mb-2 block">
+                    <span className="text-xs font-mono text-[#00c8ff] mb-2 block">
                       Pergunta {i + 1} &middot; {q.language}
                     </span>
                     <p className="text-ink-100 text-sm leading-relaxed">{q.promptText}</p>
@@ -296,7 +296,7 @@ export default function RoomPage() {
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
             <h2 className="font-mono text-sm text-ink-300 uppercase tracking-widest">Alunos</h2>
-            <div className="font-mono text-xl font-bold text-[#00ff87] bg-[#00ff87]/10 px-3 py-1 rounded-lg tracking-widest">
+            <div className="font-mono text-xl font-bold text-[#00c8ff] bg-[#00c8ff]/10 px-3 py-1 rounded-lg tracking-widest">
               {room.code}
             </div>
           </div>
@@ -331,7 +331,7 @@ export default function RoomPage() {
                       let className = "w-2 h-2 rounded-full ";
                       let title = "Sem submissão";
                       if (sub?.score !== undefined && sub.score !== null) {
-                        className += sub.score >= 70 ? "bg-[#00ff87]" : sub.score >= 40 ? "bg-warn" : "bg-danger";
+                        className += sub.score >= 70 ? "bg-[#00c8ff]" : sub.score >= 40 ? "bg-warn" : "bg-danger";
                         title = `Score: ${sub.score}`;
                       } else if (prog === "Accepted" || prog === "Runtime Error" || prog === "Error") {
                         className += "bg-ink-200";

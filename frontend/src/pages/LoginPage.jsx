@@ -33,7 +33,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm animate-fade-in">
         <div className="mb-8 text-center">
           <h1 className="font-display text-3xl font-extrabold text-white mb-1">
-            Code<span className="text-[#00ff87]">Check</span>
+            Code<span className="text-[#00c8ff]">Check</span>
           </h1>
           <p className="text-ink-400 text-sm font-mono">Acesso para docentes</p>
         </div>
@@ -65,7 +65,7 @@ export default function LoginPage() {
 
         <p className="text-center text-ink-500 text-sm mt-4 font-mono">
           Sem conta?{" "}
-          <Link to="/register" className="text-[#00ff87] hover:underline">
+          <Link to="/register" className="text-[#00c8ff] hover:underline">
             Registar
           </Link>
         </p>
