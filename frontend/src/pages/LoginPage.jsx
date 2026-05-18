@@ -31,6 +31,11 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-ink-950 flex items-center justify-center p-4">
       <div className="w-full max-w-sm animate-fade-in">
+        <div className="mb-6">
+          <Link to="/" className="inline-flex items-center gap-1 text-ink-500 hover:text-ink-200 font-mono text-xs transition-colors">
+            ← Início
+          </Link>
+        </div>
         <div className="mb-8 text-center">
           <h1 className="font-display text-3xl font-extrabold text-white mb-1">
             Code<span className="text-[#00c8ff]">Check</span>

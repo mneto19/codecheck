@@ -120,7 +120,7 @@ export default function ExamPage() {
       });
     }
     clearSession();
-    navigate("/join", { replace: true });
+    navigate("/", { replace: true });
   }
 
   if (!student || !room) return null;
