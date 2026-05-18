@@ -8,6 +8,7 @@ import RoomPage from "./pages/RoomPage";
 import ResultsPage from "./pages/ResultsPage";
 import JoinPage from "./pages/JoinPage";
 import ExamPage from "./pages/ExamPage";
+import LandingPage from "./pages/LandingPage";
 
 // Componente que protege rotas que requerem autenticação de docente
 function PrivateRoute({ children }) {
@@ -30,9 +31,9 @@ export default function App() {
         <Route path="/join" element={<JoinPage />} />
         <Route path="/exam" element={<ExamPage />} />
 
-        {/* Default redireciona alunos para a página de entrada */}
-        <Route path="/" element={<Navigate to="/join" replace />} />
-        <Route path="*" element={<Navigate to="/join" replace />} />
+        {/* Landing page */}
+        <Route path="/" element={<LandingPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );
