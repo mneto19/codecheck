@@ -1,22 +1,20 @@
 import { create } from "zustand";
+import api from "../services/api";
 
-// Store global do docente com persistência em localStorage
+// Store global do docente — token guardado em cookie httpOnly (não acessível ao JS)
+// Só o objeto user é persistido em localStorage para manter o nome na UI
 export const useAuthStore = create((set) => ({
   user: JSON.parse(localStorage.getItem("user") || "null"),
-  token: localStorage.getItem("token") || null,
 
-  // Guarda credenciais após login/registo
-  setAuth: (user, token) => {
+  setAuth: (user) => {
     localStorage.setItem("user", JSON.stringify(user));
-    localStorage.setItem("token", token);
-    set({ user, token });
+    set({ user });
   },
 
-  // Limpa credenciais ao sair
   logout: () => {
+    api.post("/auth/logout").catch(() => {});
     localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    set({ user: null, token: null });
+    set({ user: null });
   },
 }));
 
@@ -26,7 +24,6 @@ export const useStudentStore = create((set) => ({
   token: sessionStorage.getItem("studentToken") || null,
   room: JSON.parse(sessionStorage.getItem("room") || "null"),
 
-  // Inicia sessão do aluno
   setSession: (student, token, room) => {
     sessionStorage.setItem("student", JSON.stringify(student));
     sessionStorage.setItem("studentToken", token);
@@ -34,7 +31,6 @@ export const useStudentStore = create((set) => ({
     set({ student, token, room });
   },
 
-  // Termina sessão do aluno
   clearSession: () => {
     sessionStorage.clear();
     set({ student: null, token: null, room: null });

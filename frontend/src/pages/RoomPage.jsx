@@ -1,25 +1,19 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { useParams, Link } from "react-router-dom";
-import Editor from "@monaco-editor/react";
 import { roomApi, questionApi } from "../services/api";
 import { useAuthStore } from "../store/authStore";
 import { useSocket } from "../hooks/useSocket";
 import { useTimer } from "../hooks/useTimer";
 import { Button, Card, Badge, Spinner } from "../components/ui";
+import { LANG_MAP, STATUS_PT, STATUS_COLOR } from "../constants";
 
-// Mapeamento de linguagens internas para os IDs do Monaco Editor
-const LANG_MAP = {
-  PYTHON: "python", JAVASCRIPT: "javascript", JAVA: "java",
-  C: "c", CPP: "cpp", CSHARP: "csharp",
-};
-const STATUS_PT = { WAITING: "A aguardar", ACTIVE: "Em curso", FINISHED: "Terminada" };
-const STATUS_COLOR = { WAITING: "blue", ACTIVE: "green", FINISHED: "default" };
+const Editor = lazy(() => import("@monaco-editor/react"));
 
-// Página de gestão de uma sala: adicionar perguntas, iniciar exame, monitorizar alunos
+// Página de gestão da sala: adicionar perguntas, iniciar exame, monitorizar alunos
 export default function RoomPage() {
   const { id } = useParams();
-  const { token } = useAuthStore();
-  const { socketRef, connected } = useSocket(token);
+  useAuthStore(); // garante que o store está iniciado
+  const { socketRef, connected } = useSocket(null); // professor autentica via cookie httpOnly
 
   const [room, setRoom] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -46,26 +40,24 @@ export default function RoomPage() {
       setStudents(r.data.students || []);
       setQForm((f) => ({ ...f, orderIndex: r.data.questions?.length || 0 }));
       setLoading(false);
+      document.title = `${r.data.name} — CodeCheck`;
     });
   }, [id]);
 
-  // Subscreve eventos de socket após carregar a sala
+  // Eventos de socket após carregar a sala
   useEffect(() => {
     const socket = socketRef.current;
     if (!socket || !room) return;
 
-    // Junta-se ao canal privado do docente para esta sala
-    // (Repete sempre que o socket reconecta)
+    // Emite teacher:join a cada reconexão para manter o canal privado ativo
     const joinChannel = () => socket.emit("teacher:join", room.id);
     joinChannel();
     socket.on("connect", joinChannel);
 
-    // Aluno acabou de entrar na sala
     socket.on("student:joined", (student) => {
       setStudents((prev) => [...prev.filter((s) => s.id !== student.id), student]);
     });
 
-    // Submissão foi avaliada pela IA
     socket.on("submission:evaluated", (data) => {
       setSubmissions((prev) => ({
         ...prev,
@@ -73,17 +65,14 @@ export default function RoomPage() {
       }));
     });
 
-    // Sala foi marcada como terminada
     socket.on("room:finished", () => {
       setRoom((r) => ({ ...r, status: "FINISHED" }));
     });
 
-    // Progresso de execução do código do aluno
     socket.on("submission:progress", ({ studentId, questionId, status }) => {
       setProgress((prev) => ({ ...prev, [`${studentId}:${questionId}`]: status }));
     });
 
-    // Limpa listeners ao desmontar
     return () => {
       socket.off("connect", joinChannel);
       socket.off("student:joined");
@@ -104,7 +93,6 @@ export default function RoomPage() {
         orderIndex: Number(qForm.orderIndex),
       });
       setRoom((r) => ({ ...r, questions: [...(r.questions || []), res.data] }));
-      // Reset do formulário com índice incrementado
       setQForm({
         promptText: "",
         referenceCode: "# Escreve aqui o código de referência\n",
@@ -117,14 +105,12 @@ export default function RoomPage() {
     }
   }
 
-  // Elimina uma pergunta
   async function handleDeleteQuestion(qid) {
     if (!confirm("Eliminar pergunta?")) return;
     await questionApi.delete(qid);
     setRoom((r) => ({ ...r, questions: r.questions.filter((q) => q.id !== qid) }));
   }
 
-  // Inicia o exame (timer começa a contar)
   async function handleStart() {
     if (!confirm("Iniciar o exame? O timer começa imediatamente.")) return;
     setStarting(true);
@@ -245,18 +231,20 @@ export default function RoomPage() {
                     Código de referência (oculto para alunos)
                   </label>
                   <div className="rounded-lg overflow-hidden border border-ink-600">
-                    <Editor
-                      height="200px"
-                      language={LANG_MAP[qForm.language]}
-                      value={qForm.referenceCode}
-                      onChange={(v) => setQForm({ ...qForm, referenceCode: v || "" })}
-                      theme="vs-dark"
-                      options={{
-                        minimap: { enabled: false },
-                        fontSize: 13,
-                        scrollBeyondLastLine: false,
-                      }}
-                    />
+                    <Suspense fallback={<div className="h-[200px] bg-ink-900 animate-pulse" />}>
+                      <Editor
+                        height="200px"
+                        language={LANG_MAP[qForm.language]}
+                        value={qForm.referenceCode}
+                        onChange={(v) => setQForm({ ...qForm, referenceCode: v || "" })}
+                        theme="vs-dark"
+                        options={{
+                          minimap: { enabled: false },
+                          fontSize: 13,
+                          scrollBeyondLastLine: false,
+                        }}
+                      />
+                    </Suspense>
                   </div>
                 </div>
                 <Button type="submit" loading={saving} className="self-start">

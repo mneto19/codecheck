@@ -1,12 +1,10 @@
-// src/controllers/questionController.js
-
 const prisma = require("../prisma/client");
 
 async function createQuestion(req, res, next) {
   try {
     const { roomId, promptText, referenceCode, language, orderIndex } = req.body;
 
-    // Confirm the room belongs to this teacher
+    // Verifica que a sala pertence a este docente
     const room = await prisma.room.findFirst({
       where: { id: roomId, teacherId: req.user.id },
     });
@@ -20,7 +18,7 @@ async function createQuestion(req, res, next) {
       data: { roomId, promptText, referenceCode, language, orderIndex },
     });
 
-    // Return question WITHOUT referenceCode to avoid accidental exposure in logs
+    // Não expõe o referenceCode na resposta
     const { referenceCode: _, ...safeQuestion } = question;
     res.status(201).json(safeQuestion);
   } catch (err) {

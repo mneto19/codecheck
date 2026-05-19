@@ -21,10 +21,16 @@ export function Button({ children, variant = "primary", loading, className = "",
 }
 
 export function Input({ label, error, className = "", ...props }) {
+  const inputId = label ? `input-${label.toLowerCase().replace(/\s+/g, "-")}` : props.id;
   return (
     <div className="flex flex-col gap-1.5">
-      {label && <label className="text-xs font-mono text-ink-300 uppercase tracking-widest">{label}</label>}
+      {label && (
+        <label htmlFor={inputId} className="text-xs font-mono text-ink-300 uppercase tracking-widest">
+          {label}
+        </label>
+      )}
       <input
+        id={inputId}
         className={`bg-ink-800 border border-ink-600 rounded-lg px-4 py-2.5 text-ink-100 font-mono text-sm
           placeholder:text-ink-500 focus:outline-none focus:border-[#00c8ff] transition-colors
           ${error ? "border-danger" : ""} ${className}`}

@@ -4,6 +4,7 @@ const express = require("express");
 const helmet = require("helmet");
 const cors = require("cors");
 const rateLimit = require("express-rate-limit");
+const cookieParser = require("cookie-parser");
 const swaggerUi = require("swagger-ui-express");
 
 const authRoutes = require("./routes/auth");
@@ -19,7 +20,8 @@ const app = express();
 app.use(helmet());
 
 // CORS
-const allowedOrigins = (process.env.CORS_ORIGINS || "").split(",").map((o) => o.trim());
+const allowedOrigins = (process.env.CORS_ORIGINS || "")
+  .split(",").map((o) => o.trim()).filter(Boolean);
 
 app.use(
   cors({
@@ -30,6 +32,9 @@ app.use(
     credentials: true,
   })
 );
+
+// Cookie parser (para httpOnly auth_token)
+app.use(cookieParser());
 
 // Body parser
 app.use(express.json({ limit: "1mb" }));
@@ -52,10 +57,18 @@ const authLimiter = rateLimit({
   message: { error: "Too many auth attempts, try again later." },
 });
 
+// Rate limiter mais apertado para tentativas de entrada em sala (dificulta brute-force de códigos)
+const joinLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { error: "Demasiadas tentativas. Tenta novamente mais tarde." },
+});
+
 // Routes
 app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/rooms", roomRoutes);
 app.use("/api/questions", questionRoutes);
+app.use("/api/students/join", joinLimiter);
 app.use("/api/students", studentRoutes);
 app.use("/api/submissions", submissionRoutes);
 app.use("/api/results", resultRoutes);

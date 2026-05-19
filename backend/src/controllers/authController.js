@@ -4,9 +4,21 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const prisma = require("../prisma/client");
 
+const COOKIE_NAME = "auth_token";
+
 function signToken(userId) {
   return jwt.sign({ userId }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN || "7d",
+  });
+}
+
+function setCookie(res, token) {
+  const isProd = process.env.NODE_ENV === "production";
+  res.cookie(COOKIE_NAME, token, {
+    httpOnly: true,
+    sameSite: isProd ? "none" : "strict",
+    secure: isProd,
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 dias
   });
 }
 
@@ -16,7 +28,7 @@ async function register(req, res, next) {
 
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
-      return res.status(409).json({ error: "Email already registered" });
+      return res.status(409).json({ error: "Email já registado." });
     }
 
     const passwordHash = await bcrypt.hash(password, 12);
@@ -27,7 +39,8 @@ async function register(req, res, next) {
     });
 
     const token = signToken(user.id);
-    res.status(201).json({ user, token });
+    setCookie(res, token);
+    res.status(201).json({ user });
   } catch (err) {
     next(err);
   }
@@ -48,10 +61,8 @@ async function login(req, res, next) {
     }
 
     const token = signToken(user.id);
-    res.json({
-      user: { id: user.id, name: user.name, email: user.email },
-      token,
-    });
+    setCookie(res, token);
+    res.json({ user: { id: user.id, name: user.name, email: user.email } });
   } catch (err) {
     next(err);
   }
@@ -62,4 +73,9 @@ async function me(req, res) {
   res.json({ id, name, email, createdAt });
 }
 
-module.exports = { register, login, me };
+function logout(req, res) {
+  res.clearCookie(COOKIE_NAME, { sameSite: process.env.NODE_ENV === "production" ? "none" : "strict", secure: process.env.NODE_ENV === "production" });
+  res.json({ ok: true });
+}
+
+module.exports = { register, login, me, logout };

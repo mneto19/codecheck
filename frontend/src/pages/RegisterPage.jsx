@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { authApi } from "../services/api";
 import { useAuthStore } from "../store/authStore";
@@ -12,6 +12,8 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => { document.title = "Criar conta — CodeCheck"; }, []);
+
   // Cria conta e faz login imediatamente
   async function handleSubmit(e) {
     e.preventDefault();
@@ -19,7 +21,7 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       const res = await authApi.register(form);
-      setAuth(res.data.user, res.data.token);
+      setAuth(res.data.user);
       navigate("/dashboard");
     } catch (err) {
       setError(err.response?.data?.error || "Registo falhou");

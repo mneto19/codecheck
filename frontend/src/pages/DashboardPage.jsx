@@ -3,9 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { roomApi } from "../services/api";
 import { useAuthStore } from "../store/authStore";
 import { Button, Card, Badge, Spinner } from "../components/ui";
-
-const STATUS_COLOR = { WAITING: "blue", ACTIVE: "green", FINISHED: "default" };
-const STATUS_PT = { WAITING: "A aguardar", ACTIVE: "Em curso", FINISHED: "Terminada" };
+import { STATUS_PT, STATUS_COLOR } from "../constants";
 
 export default function DashboardPage() {
   const navigate = useNavigate();
@@ -17,6 +15,7 @@ export default function DashboardPage() {
   const [form, setForm] = useState({ name: "", timerSeconds: 1800 });
 
   useEffect(() => {
+    document.title = "Dashboard — CodeCheck";
     roomApi.list().then((r) => {
       setRooms(r.data);
       setLoading(false);
@@ -80,6 +79,7 @@ export default function DashboardPage() {
                     Nome da sala
                   </label>
                   <input
+                    aria-label="Nome da sala de exame"
                     className="bg-ink-700 border border-ink-600 rounded-lg px-4 py-2.5 text-ink-100 font-mono text-sm
                       placeholder:text-ink-500 focus:outline-none focus:border-[#00c8ff] transition-colors"
                     placeholder="ex: Prova Python - Turma A"
@@ -93,6 +93,7 @@ export default function DashboardPage() {
                     Duração
                   </label>
                   <select
+                    aria-label="Duração do exame"
                     className="bg-ink-700 border border-ink-600 rounded-lg px-4 py-2.5 text-ink-100 font-mono text-sm
                       focus:outline-none focus:border-[#00c8ff] transition-colors"
                     value={form.timerSeconds}

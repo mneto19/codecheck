@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { authApi } from "../services/api";
 import { useAuthStore } from "../store/authStore";
@@ -12,6 +12,8 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => { document.title = "Login — CodeCheck"; }, []);
+
   // Submete credenciais ao backend
   async function handleSubmit(e) {
     e.preventDefault();
@@ -19,7 +21,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const res = await authApi.login(form);
-      setAuth(res.data.user, res.data.token);
+      setAuth(res.data.user);
       navigate("/dashboard");
     } catch (err) {
       setError(err.response?.data?.error || "Login falhou");

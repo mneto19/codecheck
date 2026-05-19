@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router-dom';
 
-// ─── Brand gradient helpers ───────────────────────────────────────────────────
 const GRAD = 'linear-gradient(135deg, #00c8ff 0%, #a855f7 100%)';
 const GSTYLE = {
   background: GRAD,
@@ -9,7 +8,6 @@ const GSTYLE = {
   backgroundClip: 'text',
 };
 
-// ─── Data ─────────────────────────────────────────────────────────────────────
 const FEATURES = [
   {
     icon: (
@@ -64,7 +62,6 @@ const STUD_STEPS = [
   { n: '03', t: 'Recebe feedback', d: 'A IA avalia o código e mostra o score e sugestões de melhoria.' },
 ];
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
 
 function GradText({ children, className = '' }) {
   return <span className={className} style={GSTYLE}>{children}</span>;
@@ -109,7 +106,6 @@ function Step({ n, t, d }) {
   );
 }
 
-// ─── Terminal mockup ──────────────────────────────────────────────────────────
 
 function Terminal() {
   return (
@@ -117,7 +113,7 @@ function Terminal() {
       className="relative rounded-xl overflow-hidden border border-ink-700 text-left"
       style={{ background: '#0a0a14' }}
     >
-      {/* Traffic lights + filename */}
+      {/* Bolinhas de estado + nome do ficheiro */}
       <div className="flex items-center gap-2 px-4 py-3 border-b border-ink-800">
         <div className="w-3 h-3 rounded-full" style={{ background: '#ff3355', opacity: 0.7 }} />
         <div className="w-3 h-3 rounded-full" style={{ background: '#ff6b35', opacity: 0.7 }} />
@@ -125,7 +121,7 @@ function Terminal() {
         <span className="ml-3 font-mono text-xs text-ink-500">solution.py</span>
       </div>
 
-      {/* Code */}
+      {/* Código */}
       <div className="px-5 py-4 font-mono text-sm select-none space-y-0.5">
         <CodeLine delay={0.4} lnum="1">
           <Tok c="#00c8ff">def </Tok>
@@ -157,13 +153,13 @@ function Terminal() {
           <Tok c="#e4e4ed">(calcular_media(notas))</Tok>
         </CodeLine>
 
-        {/* Output divider */}
+        {/* Separador */}
         <div
           className="border-t border-ink-800 my-3"
           style={{ animation: 'lineIn 0.3s ease both', animationDelay: '1.6s', opacity: 0 }}
         />
 
-        {/* Output lines */}
+        {/* Linhas de output */}
         <OutLine delay={1.7} icon="▶" color="#45455a" text="A executar..." />
         <OutLine delay={2.1} icon="✓" color="#00c8ff" text="Output: 87.75" />
         <OutLine delay={2.5} icon="◆" color="#a855f7" text="Score IA: 94 / 100" />
@@ -206,7 +202,6 @@ function OutLine({ delay, icon, color, text }) {
   );
 }
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function LandingPage() {
   const navigate = useNavigate();
@@ -240,13 +235,13 @@ export default function LandingPage() {
         }
       `}</style>
 
-      {/* ── Navbar ──────────────────────────────────────────────────────── */}
+      {/* Barra de navegação */}
       <nav
         className="fixed top-0 left-0 right-0 z-50 border-b border-ink-800"
         style={{ background: 'rgba(8,8,14,0.85)', backdropFilter: 'blur(12px)' }}
       >
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          {/* Logo */}
+          {/* Logótipo */}
           <button
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             className="flex items-center gap-2"
@@ -255,13 +250,13 @@ export default function LandingPage() {
             <span className="font-bold text-sm" style={GSTYLE}>CodeCheck</span>
           </button>
 
-          {/* Nav links */}
+          {/* Links de navegação */}
           <div className="hidden md:flex items-center gap-8 text-sm text-ink-400">
             <a href="#funcionalidades" className="hover:text-ink-100 transition-colors">Funcionalidades</a>
             <a href="#como-funciona" className="hover:text-ink-100 transition-colors">Como funciona</a>
           </div>
 
-          {/* Actions */}
+          {/* Ações */}
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate('/login')}
@@ -280,9 +275,9 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      {/* ── Hero ────────────────────────────────────────────────────────── */}
+      {/* Secção principal */}
       <section className="relative min-h-screen flex flex-col items-center justify-center pt-16 pb-28 px-6 overflow-hidden">
-        {/* Dot grid */}
+        {/* Grelha de pontos */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
@@ -290,7 +285,7 @@ export default function LandingPage() {
             backgroundSize: '28px 28px',
           }}
         />
-        {/* Radial fade from center */}
+        {/* Desvanecer radial do centro */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
@@ -298,7 +293,7 @@ export default function LandingPage() {
           }}
         />
 
-        {/* Glow orbs */}
+        {/* Orbes de brilho */}
         <div
           className="anim-glow absolute top-1/3 left-1/4 w-96 h-96 rounded-full pointer-events-none"
           style={{ background: 'radial-gradient(circle, rgba(0,200,255,0.1) 0%, transparent 70%)', filter: 'blur(40px)' }}
@@ -308,9 +303,9 @@ export default function LandingPage() {
           style={{ background: 'radial-gradient(circle, rgba(168,85,247,0.1) 0%, transparent 70%)', filter: 'blur(40px)', animationDelay: '-2.5s' }}
         />
 
-        {/* Content */}
+        {/* Conteúdo */}
         <div className="relative z-10 max-w-3xl mx-auto text-center flex flex-col items-center gap-8">
-          {/* Pill */}
+          {/* Etiqueta */}
           <div
             className="anim-up grad-pill inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-mono text-ink-400"
             style={{ animationDelay: '0.05s', background: 'rgba(10,10,20,0.9)' }}
@@ -319,7 +314,7 @@ export default function LandingPage() {
             Avaliação por IA · Execução em tempo real · Multi-linguagem
           </div>
 
-          {/* Headline */}
+          {/* Título principal */}
           <h1
             className="anim-up font-display text-5xl sm:text-6xl lg:text-7xl font-extrabold leading-[1.18] tracking-tight"
             style={{ animationDelay: '0.2s' }}
@@ -329,7 +324,7 @@ export default function LandingPage() {
             <GradText>reinventada.</GradText>
           </h1>
 
-          {/* Subtitle */}
+          {/* Subtítulo */}
           <p
             className="anim-up max-w-xl text-base sm:text-lg text-ink-400 font-body leading-relaxed"
             style={{ animationDelay: '0.35s' }}
@@ -337,7 +332,7 @@ export default function LandingPage() {
             Plataforma de exames de programação com editor Monaco, execução em tempo real e avaliação automática por IA. Para professores que valorizam o seu tempo.
           </p>
 
-          {/* CTAs */}
+          {/* Botões de ação */}
           <div
             className="anim-up flex flex-col sm:flex-row gap-3 mt-1"
             style={{ animationDelay: '0.5s' }}
@@ -362,7 +357,7 @@ export default function LandingPage() {
             className="anim-up relative mt-8 w-full max-w-xl"
             style={{ animationDelay: '0.65s' }}
           >
-            {/* Glow halo */}
+            {/* Halo de brilho */}
             <div
               className="absolute -inset-4 rounded-3xl pointer-events-none"
               style={{
@@ -375,7 +370,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Stats bar ───────────────────────────────────────────────────── */}
+      {/* Barra de estatísticas */}
       <div className="border-y border-ink-800 bg-ink-900">
         <div className="max-w-4xl mx-auto px-6 py-5 flex flex-col sm:flex-row items-center justify-center">
           <Stat value="&lt; 3s" label="Execução de código" />
@@ -386,7 +381,7 @@ export default function LandingPage() {
         </div>
       </div>
 
-      {/* ── Features ────────────────────────────────────────────────────── */}
+      {/* Funcionalidades */}
       <section id="funcionalidades" className="py-24 px-6">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
@@ -405,7 +400,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── How it works ────────────────────────────────────────────────── */}
+      {/* Como funciona */}
       <section id="como-funciona" className="py-24 px-6 bg-ink-900">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
@@ -447,7 +442,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── CTA final ───────────────────────────────────────────────────── */}
+      {/* Chamada para ação */}
       <section className="py-28 px-6 relative overflow-hidden">
         <div
           className="absolute inset-0 pointer-events-none"
@@ -478,7 +473,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Footer ──────────────────────────────────────────────────────── */}
+      {/* Rodapé */}
       <footer className="border-t border-ink-800 bg-[#0a0a12]">
         <div className="max-w-5xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">

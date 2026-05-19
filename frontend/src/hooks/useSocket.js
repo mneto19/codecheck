@@ -8,10 +8,13 @@ export function useSocket(token, studentId = null) {
   const [connected, setConnected] = useState(false);
 
   useEffect(() => {
-    if (!token) return;
+    // Alunos precisam de token explícito; professores usam o cookie httpOnly
+    const isStudent = studentId !== null;
+    if (isStudent && !token) return;
 
     socketRef.current = io(SOCKET_URL, {
-      auth: { token },
+      auth: token ? { token } : {},
+      withCredentials: true, // envia cookie httpOnly no handshake WebSocket
       transports: ["websocket", "polling"],
       reconnection: true,
     });

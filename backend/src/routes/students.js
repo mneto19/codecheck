@@ -10,10 +10,10 @@ const joinSchema = z.object({
   nickname: z.string().min(1).max(30),
 });
 
-// No teacher auth - students join with room code only
+// Sem autenticação de docente — alunos entram com o código de sala
 router.post("/join", validate(joinSchema), studentController.joinRoom);
 
-// Get room info for a student session (no reference codes)
+// Dados da sala para o aluno (sem código de referência)
 router.get("/room/:code", studentController.getRoomForStudent);
 
 module.exports = router;

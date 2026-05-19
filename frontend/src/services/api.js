@@ -7,23 +7,25 @@ const API_BASE = import.meta.env.VITE_API_URL
 const api = axios.create({
   baseURL: API_BASE,
   timeout: 30000,
+  withCredentials: true, // envia cookie httpOnly automaticamente em cada pedido
 });
 
+// Apenas o token de aluno é enviado via header (sessionStorage, sessão temporária)
 api.interceptors.request.use((config) => {
-  if (!config.headers.Authorization) {
-    const token = localStorage.getItem("token") || sessionStorage.getItem("studentToken");
-    if (token) config.headers.Authorization = `Bearer ${token}`;
+  const studentToken = sessionStorage.getItem("studentToken");
+  if (studentToken && !config.headers.Authorization) {
+    config.headers.Authorization = `Bearer ${studentToken}`;
   }
   return config;
 });
 
+// Em caso de 401, limpa dados locais e redireciona para login (apenas rotas de professor)
 api.interceptors.response.use(
   (res) => res,
   (err) => {
     if (err.response?.status === 401) {
       const isStudentRoute = window.location.pathname.startsWith("/exam");
       if (!isStudentRoute) {
-        localStorage.removeItem("token");
         localStorage.removeItem("user");
         window.location.href = "/login";
       }
@@ -34,43 +36,39 @@ api.interceptors.response.use(
 
 export const authApi = {
   register: (data) => api.post("/auth/register", data),
-  login: (data) => api.post("/auth/login", data),
-  me: () => api.get("/auth/me"),
+  login:    (data) => api.post("/auth/login", data),
+  me:       ()     => api.get("/auth/me"),
+  logout:   ()     => api.post("/auth/logout"),
 };
 
 export const roomApi = {
   create: (data) => api.post("/rooms", data),
-  list: () => api.get("/rooms"),
-  get: (id) => api.get(`/rooms/${id}`),
-  delete: (id) => api.delete(`/rooms/${id}`),
-  start: (id) => api.post(`/rooms/${id}/start`),
-  finish: (id) => api.post(`/rooms/${id}/finish`),
+  list:   ()     => api.get("/rooms"),
+  get:    (id)   => api.get(`/rooms/${id}`),
+  delete: (id)   => api.delete(`/rooms/${id}`),
+  start:  (id)   => api.post(`/rooms/${id}/start`),
+  finish: (id)   => api.post(`/rooms/${id}/finish`),
 };
 
 export const questionApi = {
-  create: (data) => api.post("/questions", data),
+  create: (data)     => api.post("/questions", data),
   update: (id, data) => api.put(`/questions/${id}`, data),
-  delete: (id) => api.delete(`/questions/${id}`),
+  delete: (id)       => api.delete(`/questions/${id}`),
 };
 
 export const studentApi = {
-  join: (data) => api.post("/students/join", data),
+  join:    (data) => api.post("/students/join", data),
   getRoom: (code) => api.get(`/students/room/${code}`),
 };
 
 export const submissionApi = {
-  submit: (data) => {
-    const token = sessionStorage.getItem("studentToken");
-    return api.post("/submissions", data, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-  },
+  submit: (data) => api.post("/submissions", data),
 };
 
 export const resultsApi = {
-  getRoom: (roomId) => api.get(`/results/room/${roomId}`),
-  getSubmission: (id) => api.get(`/results/submission/${id}`),
-  analyze: (roomId) => api.post(`/results/room/${roomId}/analyze`),
+  getRoom:       (roomId) => api.get(`/results/room/${roomId}`),
+  getSubmission: (id)     => api.get(`/results/submission/${id}`),
+  analyze:       (roomId) => api.post(`/results/room/${roomId}/analyze`),
 };
 
 export default api;

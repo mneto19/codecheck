@@ -11,7 +11,7 @@ const submitSchema = z.object({
   studentCode: z.string().min(1).max(20000, "Código demasiado longo."),
 });
 
-// Student submits code
+// Submissão de código pelo aluno
 router.post("/", requireStudentAuth, validate(submitSchema), submissionController.submitCode);
 
 module.exports = router;

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { studentApi } from "../services/api";
 import { useStudentStore } from "../store/authStore";
@@ -13,6 +13,8 @@ export default function JoinPage() {
   const [studentNumber, setStudentNumber] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => { document.title = "Entrar no Exame — CodeCheck"; }, []);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -68,6 +70,7 @@ export default function JoinPage() {
               </p>
               <input
                 autoFocus
+                aria-label="Código de sala"
                 className="w-full text-center text-4xl font-mono font-bold bg-ink-800 border-2 border-ink-600
                   focus:border-[#00c8ff] outline-none rounded-2xl px-6 py-5 text-white uppercase
                   tracking-[0.3em] transition-colors placeholder:text-ink-600 placeholder:tracking-[0.2em]"
@@ -77,8 +80,8 @@ export default function JoinPage() {
                 onChange={(e) => setCode(e.target.value.toUpperCase())}
                 required
               />
-              {error && <p className="text-danger font-mono text-sm">{error}</p>}
-              <Button type="submit" className="w-full justify-center text-lg py-4">
+              {error && <p className="text-danger font-mono text-sm" role="alert">{error}</p>}
+              <Button type="submit" aria-label="Continuar para passo seguinte" className="w-full justify-center text-lg py-4">
                 Continuar
               </Button>
             </>
@@ -90,6 +93,7 @@ export default function JoinPage() {
               <p className="text-ink-300 font-mono text-sm text-center">Qual é o teu nome?</p>
               <input
                 autoFocus
+                aria-label="Nome ou nickname"
                 className="w-full text-center text-2xl font-mono font-semibold bg-ink-800 border-2 border-ink-600
                   focus:border-[#00c8ff] outline-none rounded-2xl px-6 py-4 text-white
                   transition-colors placeholder:text-ink-600"
@@ -119,6 +123,7 @@ export default function JoinPage() {
               <p className="text-ink-300 font-mono text-sm text-center">Qual é o teu número de aluno?</p>
               <input
                 autoFocus
+                aria-label="Número de aluno (opcional)"
                 className="w-full text-center text-2xl font-mono font-semibold bg-ink-800 border-2 border-ink-600
                   focus:border-[#00c8ff] outline-none rounded-2xl px-6 py-4 text-white
                   transition-colors placeholder:text-ink-600"

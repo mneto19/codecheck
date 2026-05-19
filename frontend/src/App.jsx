@@ -11,9 +11,10 @@ import ExamPage from "./pages/ExamPage";
 import LandingPage from "./pages/LandingPage";
 
 // Componente que protege rotas que requerem autenticação de docente
+// Guarda proteção: verifica user em localStorage; o backend valida o cookie em cada pedido
 function PrivateRoute({ children }) {
-  const { token } = useAuthStore();
-  return token ? children : <Navigate to="/login" replace />;
+  const { user } = useAuthStore();
+  return user ? children : <Navigate to="/login" replace />;
 }
 
 export default function App() {
@@ -31,7 +32,7 @@ export default function App() {
         <Route path="/join" element={<JoinPage />} />
         <Route path="/exam" element={<ExamPage />} />
 
-        {/* Landing page */}
+        {/* Página inicial */}
         <Route path="/" element={<LandingPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

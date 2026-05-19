@@ -3,6 +3,7 @@
 const router = require("express").Router();
 const { z } = require("zod");
 const { validate } = require("../middleware/validate");
+const { requireAuth } = require("../middleware/auth");
 const authController = require("../controllers/authController");
 
 const registerSchema = z.object({
@@ -18,6 +19,7 @@ const loginSchema = z.object({
 
 router.post("/register", validate(registerSchema), authController.register);
 router.post("/login", validate(loginSchema), authController.login);
-router.get("/me", require("../middleware/auth").requireAuth, authController.me);
+router.get("/me", requireAuth, authController.me);
+router.post("/logout", authController.logout);
 
 module.exports = router;

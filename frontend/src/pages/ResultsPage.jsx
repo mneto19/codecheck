@@ -1,15 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { useParams, Link } from "react-router-dom";
-import Editor from "@monaco-editor/react";
 import { resultsApi } from "../services/api";
 import { useAuthStore } from "../store/authStore";
 import { useSocket } from "../hooks/useSocket";
 import { Card, Badge, Button, Spinner, ScoreRing } from "../components/ui";
+import { LANG_MAP } from "../constants";
 
-const LANG_MAP = {
-  PYTHON: "python", JAVASCRIPT: "javascript", JAVA: "java",
-  C: "c", CPP: "cpp", CSHARP: "csharp",
-};
+const Editor = lazy(() => import("@monaco-editor/react"));
 
 export default function ResultsPage() {
   const { id } = useParams();
@@ -332,18 +329,15 @@ export default function ResultsPage() {
                         Código do aluno
                       </p>
                       <div className="rounded-lg overflow-hidden border border-ink-600">
-                        <Editor
-                          height="200px"
-                          language={LANG_MAP[subDetail.question.language]}
-                          value={subDetail.studentCode}
-                          theme="vs-dark"
-                          options={{
-                            readOnly: true,
-                            minimap: { enabled: false },
-                            fontSize: 12,
-                            scrollBeyondLastLine: false,
-                          }}
-                        />
+                        <Suspense fallback={<div className="h-[200px] bg-ink-900 animate-pulse" />}>
+                          <Editor
+                            height="200px"
+                            language={LANG_MAP[subDetail.question.language]}
+                            value={subDetail.studentCode}
+                            theme="vs-dark"
+                            options={{ readOnly: true, minimap: { enabled: false }, fontSize: 12, scrollBeyondLastLine: false }}
+                          />
+                        </Suspense>
                       </div>
                     </div>
                     <div>
@@ -351,18 +345,15 @@ export default function ResultsPage() {
                         Código de referência
                       </p>
                       <div className="rounded-lg overflow-hidden border border-ink-600">
-                        <Editor
-                          height="200px"
-                          language={LANG_MAP[subDetail.question.language]}
-                          value={subDetail.referenceCode}
-                          theme="vs-dark"
-                          options={{
-                            readOnly: true,
-                            minimap: { enabled: false },
-                            fontSize: 12,
-                            scrollBeyondLastLine: false,
-                          }}
-                        />
+                        <Suspense fallback={<div className="h-[200px] bg-ink-900 animate-pulse" />}>
+                          <Editor
+                            height="200px"
+                            language={LANG_MAP[subDetail.question.language]}
+                            value={subDetail.referenceCode}
+                            theme="vs-dark"
+                            options={{ readOnly: true, minimap: { enabled: false }, fontSize: 12, scrollBeyondLastLine: false }}
+                          />
+                        </Suspense>
                       </div>
                     </div>
                   </div>
