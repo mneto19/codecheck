@@ -215,8 +215,4 @@ Desenvolvido por **Manuel Neto** como projeto final de curso.
 
 [![GitHub](https://img.shields.io/badge/@mneto19-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/mneto19)
 
----
-
-<div align="center">
-  <sub>Feito com ☕ e muito código · 2025</sub>
 </div>
