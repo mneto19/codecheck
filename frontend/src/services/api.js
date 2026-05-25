@@ -6,7 +6,7 @@ const API_BASE = import.meta.env.VITE_API_URL
 
 const api = axios.create({
   baseURL: API_BASE,
-  timeout: 30000,
+  timeout: 10000,
   withCredentials: true, // envia cookie httpOnly automaticamente em cada pedido
 });
 
@@ -25,7 +25,8 @@ api.interceptors.response.use(
   (err) => {
     if (err.response?.status === 401) {
       const isStudentRoute = window.location.pathname.startsWith("/exam");
-      if (!isStudentRoute) {
+      const isAuthEndpoint = err.config?.url?.includes("/auth/");
+      if (!isStudentRoute && !isAuthEndpoint) {
         localStorage.removeItem("user");
         window.location.href = "/login";
       }
