@@ -8,6 +8,7 @@ const studentController = require("../controllers/studentController");
 const joinSchema = z.object({
   roomCode: z.string().length(6).toUpperCase(),
   nickname: z.string().min(1).max(30),
+  studentNumber: z.string().optional(),
 });
 
 // Sem autenticação de docente — alunos entram com o código de sala

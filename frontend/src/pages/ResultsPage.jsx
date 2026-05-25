@@ -24,7 +24,7 @@ export default function ResultsPage() {
     resultsApi.getRoom(id).then((r) => {
       setData(r.data);
       setLoading(false);
-    });
+    }).catch(() => setLoading(false));
   }, [id]);
 
   useEffect(() => {
@@ -67,9 +67,12 @@ export default function ResultsPage() {
 
   async function loadSubmission(subId) {
     setLoadingDetail(true);
-    const res = await resultsApi.getSubmission(subId);
-    setSubDetail(res.data);
-    setLoadingDetail(false);
+    try {
+      const res = await resultsApi.getSubmission(subId);
+      setSubDetail(res.data);
+    } finally {
+      setLoadingDetail(false);
+    }
   }
 
   async function handleReanalyze() {
