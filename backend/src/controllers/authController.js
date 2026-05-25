@@ -4,6 +4,20 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const prisma = require("../prisma/client");
 
+const DB_TIMEOUT = 8000;
+
+function withTimeout(promise, ms) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) =>
+      setTimeout(
+        () => reject(Object.assign(new Error("Base de dados não respondeu a tempo."), { status: 503 })),
+        ms
+      )
+    ),
+  ]);
+}
+
 const COOKIE_NAME = "auth_token";
 
 function signToken(userId) {
@@ -26,7 +40,7 @@ async function register(req, res, next) {
   try {
     const { name, email, password } = req.body;
 
-    const existing = await prisma.user.findUnique({ where: { email } });
+    const existing = await withTimeout(prisma.user.findUnique({ where: { email } }), DB_TIMEOUT);
     if (existing) {
       return res.status(409).json({ error: "Email já registado." });
     }
@@ -50,7 +64,7 @@ async function login(req, res, next) {
   try {
     const { email, password } = req.body;
 
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await withTimeout(prisma.user.findUnique({ where: { email } }), DB_TIMEOUT);
 
     // Hash dummy para tempo constante — previne timing attack mesmo quando email não existe
     const hashToCheck = user?.passwordHash ?? "$2b$12$invalidhashvaluefortimingatkxx";
