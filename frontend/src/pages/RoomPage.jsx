@@ -41,7 +41,7 @@ export default function RoomPage() {
       setQForm((f) => ({ ...f, orderIndex: r.data.questions?.length || 0 }));
       setLoading(false);
       document.title = `${r.data.name} — CodeCheck`;
-    });
+    }).catch(() => setLoading(false));
   }, [id]);
 
   // Eventos de socket após carregar a sala
@@ -107,8 +107,12 @@ export default function RoomPage() {
 
   async function handleDeleteQuestion(qid) {
     if (!confirm("Eliminar pergunta?")) return;
-    await questionApi.delete(qid);
-    setRoom((r) => ({ ...r, questions: r.questions.filter((q) => q.id !== qid) }));
+    try {
+      await questionApi.delete(qid);
+      setRoom((r) => ({ ...r, questions: r.questions.filter((q) => q.id !== qid) }));
+    } catch {
+      // servidor recusou — não atualiza estado local
+    }
   }
 
   async function handleStart() {

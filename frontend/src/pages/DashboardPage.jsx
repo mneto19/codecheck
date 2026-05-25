@@ -19,7 +19,7 @@ export default function DashboardPage() {
     roomApi.list().then((r) => {
       setRooms(r.data);
       setLoading(false);
-    });
+    }).catch(() => setLoading(false));
   }, []);
 
   async function handleCreate(e) {
@@ -38,8 +38,12 @@ export default function DashboardPage() {
 
   async function handleDelete(id) {
     if (!confirm("Eliminar esta sala?")) return;
-    await roomApi.delete(id);
-    setRooms(rooms.filter((r) => r.id !== id));
+    try {
+      await roomApi.delete(id);
+      setRooms(rooms.filter((r) => r.id !== id));
+    } catch {
+      // servidor recusou — não atualiza estado local
+    }
   }
 
   return (
