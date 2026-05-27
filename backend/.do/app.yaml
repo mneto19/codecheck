@@ -1,0 +1,22 @@
+name: codecheck-backend
+region: fra
+services:
+  - name: api
+    github:
+      repo: mneto19/codecheck
+      branch: main
+      deploy_on_push: true
+    source_dir: backend
+    build_command: npm install && npx prisma generate
+    run_command: npm start
+    http_port: 3000
+    health_check:
+      http_path: /health
+      timeout_seconds: 30
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3000"
