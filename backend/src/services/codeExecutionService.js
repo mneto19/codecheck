@@ -28,7 +28,11 @@ async function executeCode(sourceCode, language, stdin = "") {
   );
 
   const data = response.data;
-  const hasError = data.statusCode !== 200 || (data.output || "").includes("error");
+  const output = data.output || "";
+  // Só marca erro por falha da API ou por assinaturas reais de erro de runtime/compilação.
+  // Evita falsos positivos de programas que legitimamente imprimem a palavra "error".
+  const errorSignatures = /Traceback \(most recent call last\)|SyntaxError|NameError|TypeError|ValueError|IndexError|KeyError|AttributeError|Exception in thread|Segmentation fault|error: |fatal error|Unhandled exception|ReferenceError/i;
+  const hasError = data.statusCode !== 200 || errorSignatures.test(output);
 
   return {
     status: hasError ? "Runtime Error" : "Accepted",

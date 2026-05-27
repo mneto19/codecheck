@@ -66,13 +66,20 @@ const joinLimiter = rateLimit({
   message: { error: "Demasiadas tentativas. Tenta novamente mais tarde." },
 });
 
+// Limita submissões por aluno/IP — protege a quota da API de execução (JDoodle)
+const submissionLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 30,
+  message: { error: "Demasiadas submissões. Aguarda um momento." },
+});
+
 // Routes
 app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/rooms", roomRoutes);
 app.use("/api/questions", questionRoutes);
 app.use("/api/students/join", joinLimiter);
 app.use("/api/students", studentRoutes);
-app.use("/api/submissions", submissionRoutes);
+app.use("/api/submissions", submissionLimiter, submissionRoutes);
 app.use("/api/results", resultRoutes);
 
 // Health check
