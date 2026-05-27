@@ -1,5 +1,6 @@
 const { Server } = require("socket.io");
 const jwt = require("jsonwebtoken");
+const prisma = require("../prisma/client");
 
 let io;
 
@@ -45,8 +46,16 @@ function initSocket(server) {
     const payload = socket.data.payload;
 
     if (payload.userId) {
-      socket.on("teacher:join", (roomId) => {
-        socket.join(`teacher:${roomId}`);
+      socket.on("teacher:join", async (roomId) => {
+        try {
+          // Só permite ouvir a sala se for o professor dono dela
+          const room = await prisma.room.findFirst({
+            where: { id: roomId, teacherId: payload.userId },
+          });
+          if (room) socket.join(`teacher:${roomId}`);
+        } catch {
+          // Falha a verificar — não junta à sala
+        }
       });
     }
 
