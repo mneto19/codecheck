@@ -33,13 +33,14 @@ export default function JoinPage() {
       return;
     }
 
+    if (!studentNumber.trim()) return setError("Introduz o teu número de aluno.");
     setLoading(true);
     setError("");
     try {
       const res = await studentApi.join({
         roomCode: code.toUpperCase(),
         nickname: nickname.trim(),
-        studentNumber: studentNumber.trim() || undefined,
+        studentNumber: studentNumber.trim(),
       });
       setSession(res.data.student, res.data.token, res.data.room);
       navigate("/exam");
@@ -123,7 +124,7 @@ export default function JoinPage() {
               <p className="text-ink-300 font-mono text-sm text-center">Qual é o teu número de aluno?</p>
               <input
                 autoFocus
-                aria-label="Número de aluno (opcional)"
+                aria-label="Número de aluno"
                 className="w-full text-center text-2xl font-mono font-semibold bg-ink-800 border-2 border-ink-600
                   focus:border-[#00c8ff] outline-none rounded-2xl px-6 py-4 text-white
                   transition-colors placeholder:text-ink-600"
@@ -131,6 +132,7 @@ export default function JoinPage() {
                 maxLength={20}
                 value={studentNumber}
                 onChange={(e) => setStudentNumber(e.target.value)}
+                required
               />
               {error && <p className="text-danger font-mono text-sm">{error}</p>}
               <div className="flex gap-3 w-full">

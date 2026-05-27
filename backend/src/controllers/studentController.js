@@ -34,20 +34,25 @@ async function joinRoom(req, res, next) {
     let student;
     try {
       student = await prisma.student.create({
-        data: { roomId: room.id, nickname, studentNumber: studentNumber || null },
+        data: { roomId: room.id, nickname, studentNumber },
       });
     } catch (err) {
       if (err.code === "P2002") {
-        student = await prisma.student.findFirst({
+        const existing = await prisma.student.findFirst({
           where: { roomId: room.id, nickname },
         });
-        if (!student) throw err;
-        if (studentNumber && !student.studentNumber) {
-          student = await prisma.student.update({
-            where: { id: student.id },
-            data: { studentNumber },
-          });
+        if (!existing) throw err;
+        // Rejoin só é permitido se o número de aluno coincidir — impede roubo de identidade
+        if (existing.studentNumber && existing.studentNumber !== studentNumber) {
+          return res.status(409).json({ error: "Nickname já em uso nesta sala." });
         }
+        // Mesma pessoa a reentrar (ou registo antigo sem número) — preenche o número se faltava
+        student = existing.studentNumber
+          ? existing
+          : await prisma.student.update({
+              where: { id: existing.id },
+              data: { studentNumber },
+            });
       } else {
         throw err;
       }
