@@ -16,6 +16,8 @@ const resultRoutes = require("./routes/results");
 
 const app = express();
 
+app.set("trust proxy", 1);
+
 // Headers de segurança HTTP
 app.use(helmet());
 
