@@ -377,7 +377,7 @@ export default function LandingPage() {
           <div className="hidden sm:block w-px h-8 bg-ink-700" />
           <Stat value="IA" label="Avaliação automática" />
           <div className="hidden sm:block w-px h-8 bg-ink-700" />
-          <Stat value="10+" label="Linguagens suportadas" />
+          <Stat value="6" label="Linguagens suportadas" />
         </div>
       </div>
 

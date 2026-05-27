@@ -10,7 +10,7 @@
   </a>
   <img src="https://img.shields.io/badge/Node.js-≥20-339933?style=flat-square&logo=nodedotjs&logoColor=white" alt="Node.js" />
   <img src="https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=black" alt="React" />
-  <img src="https://img.shields.io/badge/Backend-Railway-0B0D0E?style=flat-square&logo=railway&logoColor=white" alt="Railway" />
+  <img src="https://img.shields.io/badge/Backend-DigitalOcean-0080FF?style=flat-square&logo=digitalocean&logoColor=white" alt="DigitalOcean" />
   <img src="https://img.shields.io/badge/Frontend-Vercel-000000?style=flat-square&logo=vercel&logoColor=white" alt="Vercel" />
   <img src="https://img.shields.io/badge/DB-Supabase-3FCF8E?style=flat-square&logo=supabase&logoColor=white" alt="Supabase" />
 </p>
@@ -67,7 +67,7 @@ Cada submissão é executada em ambiente isolado via **JDoodle** e avaliada auto
 ![React Router](https://img.shields.io/badge/React_Router-CA4245?style=flat-square&logo=reactrouter&logoColor=white)
 
 ### Infraestrutura
-![Railway](https://img.shields.io/badge/Railway-0B0D0E?style=flat-square&logo=railway&logoColor=white)
+![DigitalOcean](https://img.shields.io/badge/DigitalOcean-0080FF?style=flat-square&logo=digitalocean&logoColor=white)
 ![Vercel](https://img.shields.io/badge/Vercel-000000?style=flat-square&logo=vercel&logoColor=white)
 ![Supabase](https://img.shields.io/badge/Supabase-3FCF8E?style=flat-square&logo=supabase&logoColor=white)
 ![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=flat-square&logo=githubactions&logoColor=white)
@@ -84,7 +84,7 @@ Cada submissão é executada em ambiente isolado via **JDoodle** e avaliada auto
                 │  HTTP REST + WebSocket
                 ▼
 ┌──────────────────────────────────────┐
-│       Railway — Express API          │
+│    Digital Ocean — Express API       │
 │  Auth JWT · Zod · Helmet · Rate Limit│
 │  Worker Queue  (máx. 3 concorrentes) │
 └──────┬───────────────┬───────────────┘
@@ -154,14 +154,15 @@ Cria o ficheiro `backend/.env` com as seguintes variáveis:
 
 ## Deployment
 
-### Backend → Railway
+### Backend → Digital Ocean App Platform
 
-Configurado em [`backend/railway.toml`](./backend/railway.toml):
+Configurado em [`backend/.do/app.yaml`](./backend/.do/app.yaml):
 
-- **Root Directory:** `backend/`
+- **Source Directory:** `backend/`
 - **Build:** `npm install && npx prisma generate`
 - **Start:** `npm start`
 - **Health check:** `/health`
+- **Região:** Frankfurt (fra)
 
 ### Frontend → Vercel
 
@@ -170,7 +171,7 @@ Configurado em [`backend/railway.toml`](./backend/railway.toml):
 - **Build Command:** `npm run build`
 - **Output Directory:** `dist/`
 
-Define a variável `VITE_API_URL` com o URL do backend no Railway.
+Define a variável `VITE_API_URL` com o URL do backend no Digital Ocean.
 
 ---
 
@@ -185,7 +186,7 @@ codecheck/
 │   │   ├── services/          # JDoodle, Groq AI, Socket.io, Worker Queue
 │   │   └── middleware/        # Auth JWT, validação Zod, rate limiting
 │   ├── prisma/                # Schema Prisma e migrações
-│   ├── railway.toml           # Configuração Railway
+│   ├── .do/app.yaml           # Configuração Digital Ocean App Platform
 │   └── README.md              # Documentação detalhada do backend
 ├── frontend/                  # React 18 / Vite
 │   ├── src/
