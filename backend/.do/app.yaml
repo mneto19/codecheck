@@ -5,7 +5,7 @@ services:
     github:
       repo: mneto19/codecheck
       branch: main
-      deploy_on_push: true
+      deploy_on_push: false
     source_dir: backend
     build_command: npm install && npx prisma generate
     run_command: npm start
