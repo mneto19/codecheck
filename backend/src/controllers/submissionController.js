@@ -3,7 +3,7 @@ const { enqueue } = require("../services/workerQueue");
 
 async function submitCode(req, res, next) {
   try {
-    const { questionId, studentCode } = req.body;
+    const { questionId, studentCode, pasteCount, pastedChars } = req.body;
     const { student, room } = req;
 
     if (room.status !== "ACTIVE") {
@@ -30,6 +30,8 @@ async function submitCode(req, res, next) {
         aiLogicDifferences: null,
         aiStyleNotes: null,
         aiSummary: null,
+        pasteCount: pasteCount ?? 0,
+        pastedChars: pastedChars ?? 0,
         submittedAt: new Date(),
       },
       create: {
@@ -37,6 +39,8 @@ async function submitCode(req, res, next) {
         studentId: student.id,
         studentCode,
         executionStatus: "Queued",
+        pasteCount: pasteCount ?? 0,
+        pastedChars: pastedChars ?? 0,
       },
     });
 

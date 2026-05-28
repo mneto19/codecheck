@@ -48,8 +48,8 @@ A aplicação fica disponível em `http://localhost:5173`.
 | /login | Docente | Login |
 | /register | Docente | Registo |
 | /dashboard | Docente | Lista de salas |
-| /rooms/:id | Docente | Gerir sala, perguntas e iniciar exame |
-| /rooms/:id/results | Docente | Resultados completos com análise IA |
+| /rooms/:id | Docente | Gerir sala e perguntas, gerar casos de teste e iniciar exame |
+| /rooms/:id/results | Docente | Resultados: notas, resultado dos testes, aviso de IA e de colagens |
 
 ## Estrutura
 

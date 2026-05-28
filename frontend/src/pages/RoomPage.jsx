@@ -30,6 +30,13 @@ export default function RoomPage() {
   const [saving, setSaving] = useState(false);
   const [starting, setStarting] = useState(false);
 
+  // Correção por testes (só Python/JS): inputs gerados pela IA, outputs vindos da referência
+  const [genTests, setGenTests] = useState(null); // array de { inputText, expected } ou null
+  const [functionName, setFunctionName] = useState(null);
+  const [generating, setGenerating] = useState(false);
+  const [genError, setGenError] = useState("");
+  const testsSupported = qForm.language === "PYTHON" || qForm.language === "JAVASCRIPT";
+
   // Hook do timer baseado em room.startedAt
   const { formatted, remaining } = useTimer(room?.startedAt, room?.timerSeconds);
 
@@ -82,23 +89,81 @@ export default function RoomPage() {
     };
   }, [socketRef, room]);
 
+  function resetForm() {
+    setQForm({
+      promptText: "",
+      referenceCode: "# Escreve aqui o código de referência\n",
+      language: "PYTHON",
+      orderIndex: (room?.questions?.length || 0) + 1,
+    });
+    setGenTests(null);
+    setFunctionName(null);
+    setGenError("");
+  }
+
+  // Gera testes automaticamente: a IA sugere inputs, a referência dá os outputs esperados
+  async function handleGenerateTests() {
+    setGenerating(true);
+    setGenError("");
+    try {
+      const res = await questionApi.generateTests({
+        promptText: qForm.promptText,
+        referenceCode: qForm.referenceCode,
+        language: qForm.language,
+      });
+      setFunctionName(res.data.functionName);
+      setGenTests(
+        res.data.testCases.map((c) => ({
+          inputText: JSON.stringify(c.input),
+          expected: c.expected,
+        }))
+      );
+    } catch (err) {
+      setGenError(err.response?.data?.error || "Não foi possível gerar os testes.");
+    } finally {
+      setGenerating(false);
+    }
+  }
+
+  function updateTest(i, field, value) {
+    setGenTests((t) => t.map((row, idx) => (idx === i ? { ...row, [field]: value } : row)));
+  }
+  function removeTest(i) {
+    setGenTests((t) => t.filter((_, idx) => idx !== i));
+  }
+  function addTest() {
+    setGenTests((t) => [...(t || []), { inputText: "[]", expected: "" }]);
+  }
+
   // Adiciona uma nova pergunta à sala
   async function handleAddQuestion(e) {
     e.preventDefault();
+
+    // Converte os testes editados (inputText JSON → array). Bloqueia se algum JSON for inválido.
+    let testCases;
+    if (genTests?.length) {
+      try {
+        testCases = genTests.map((row) => ({
+          input: JSON.parse(row.inputText),
+          expected: row.expected,
+        }));
+      } catch {
+        setGenError("Há um input com JSON inválido. Corrige antes de guardar (ex: [\"radar\"]).");
+        return;
+      }
+    }
+
     setSaving(true);
     try {
       const res = await questionApi.create({
         ...qForm,
         roomId: id,
         orderIndex: Number(qForm.orderIndex),
+        functionName: testCases ? functionName : undefined,
+        testCases,
       });
       setRoom((r) => ({ ...r, questions: [...(r.questions || []), res.data] }));
-      setQForm({
-        promptText: "",
-        referenceCode: "# Escreve aqui o código de referência\n",
-        language: "PYTHON",
-        orderIndex: (room?.questions?.length || 0) + 1,
-      });
+      resetForm();
       setShowQuestionForm(false);
     } finally {
       setSaving(false);
@@ -193,7 +258,10 @@ export default function RoomPage() {
               Perguntas ({room.questions?.length || 0})
             </h2>
             {room.status === "WAITING" && (
-              <Button variant="ghost" onClick={() => setShowQuestionForm(!showQuestionForm)}>
+              <Button variant="ghost" onClick={() => {
+                if (showQuestionForm) resetForm();
+                setShowQuestionForm(!showQuestionForm);
+              }}>
                 {showQuestionForm ? "Cancelar" : "+ Adicionar"}
               </Button>
             )}
@@ -251,6 +319,87 @@ export default function RoomPage() {
                     </Suspense>
                   </div>
                 </div>
+
+                {/* Correção por testes (opcional) — só Python/JS */}
+                <div className="flex flex-col gap-2 border-t border-ink-700 pt-4">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-mono text-ink-300 uppercase tracking-widest">
+                      Correção por testes <span className="text-ink-500 normal-case">(opcional)</span>
+                    </label>
+                    {testsSupported && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={handleGenerateTests}
+                        loading={generating}
+                        disabled={!qForm.promptText.trim() || !qForm.referenceCode.trim()}
+                      >
+                        {genTests ? "Regenerar testes" : "Gerar testes automaticamente"}
+                      </Button>
+                    )}
+                  </div>
+
+                  {!testsSupported ? (
+                    <p className="text-ink-500 font-mono text-xs">
+                      Disponível apenas para Python e JavaScript. Nas outras linguagens, a nota é dada pela IA.
+                    </p>
+                  ) : (
+                    <p className="text-ink-500 font-mono text-xs">
+                      A IA sugere os inputs; os resultados esperados saem do teu código de referência. Podes editar ou apagar antes de guardar — se não gerares nada, a nota fica a cargo da IA.
+                    </p>
+                  )}
+
+                  {genError && <p className="text-danger font-mono text-xs" role="alert">{genError}</p>}
+
+                  {genTests && (
+                    <div className="flex flex-col gap-2 mt-1">
+                      {functionName && (
+                        <p className="text-ink-400 font-mono text-xs">
+                          Função detetada: <span className="text-[#00c8ff]">{functionName}</span>
+                        </p>
+                      )}
+                      <div className="flex flex-col gap-1.5">
+                        <div className="flex gap-2 text-[10px] font-mono text-ink-500 uppercase tracking-widest px-1">
+                          <span className="flex-1">Input (JSON)</span>
+                          <span className="flex-1">Resultado esperado</span>
+                          <span className="w-8" />
+                        </div>
+                        {genTests.map((row, i) => (
+                          <div key={i} className="flex gap-2 items-center">
+                            <input
+                              className="flex-1 bg-ink-700 border border-ink-600 rounded px-2 py-1.5 text-ink-100 font-mono text-xs focus:outline-none focus:border-[#00c8ff]"
+                              value={row.inputText}
+                              onChange={(e) => updateTest(i, "inputText", e.target.value)}
+                              placeholder='["radar"]'
+                            />
+                            <input
+                              className="flex-1 bg-ink-700 border border-ink-600 rounded px-2 py-1.5 text-ink-100 font-mono text-xs focus:outline-none focus:border-[#00c8ff]"
+                              value={row.expected}
+                              onChange={(e) => updateTest(i, "expected", e.target.value)}
+                              placeholder="True"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeTest(i)}
+                              className="w-8 text-ink-500 hover:text-danger font-mono text-sm"
+                              title="Remover teste"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={addTest}
+                        className="self-start text-ink-400 hover:text-[#00c8ff] font-mono text-xs mt-1"
+                      >
+                        + Adicionar caso manual
+                      </button>
+                    </div>
+                  )}
+                </div>
+
                 <Button type="submit" loading={saving} className="self-start">
                   Guardar pergunta
                 </Button>
@@ -270,6 +419,9 @@ export default function RoomPage() {
                   <div className="flex-1">
                     <span className="text-xs font-mono text-[#00c8ff] mb-2 block">
                       Pergunta {i + 1} &middot; {q.language}
+                      {q.testCases?.length > 0 && (
+                        <span className="text-ink-500"> &middot; {q.testCases.length} testes</span>
+                      )}
                     </span>
                     <p className="text-ink-100 text-sm leading-relaxed">{q.promptText}</p>
                   </div>

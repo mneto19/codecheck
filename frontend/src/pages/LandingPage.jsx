@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const GRAD = 'linear-gradient(135deg, #00c8ff 0%, #a855f7 100%)';
@@ -205,6 +206,8 @@ function OutLine({ delay, icon, color, text }) {
 
 export default function LandingPage() {
   const navigate = useNavigate();
+
+  useEffect(() => { document.title = "CodeCheck — Avaliação de código"; }, []);
 
   return (
     <div className="min-h-screen bg-ink-950 text-ink-100 overflow-x-hidden">
