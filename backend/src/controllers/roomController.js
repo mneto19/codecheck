@@ -5,6 +5,7 @@ const { generateRoomCode } = require("../utils/roomCode");
 const { getIO } = require("../services/socketService");
 const { compareCodeBatch } = require("../services/aiService");
 const { executeCode } = require("../services/codeExecutionService");
+const { isTestSupported, gradeAgainstCases } = require("../services/testRunnerService");
 
 async function analyzeRoomSubmissions(roomId) {
   const submissions = await prisma.submission.findMany({
@@ -71,16 +72,43 @@ async function analyzeRoomSubmissions(roomId) {
     }));
   }
 
-  results = results.map((ai) => {
-    const sub = submissions.find((s) => s.id === ai.id);
-    if (!sub || ai.correctness_score === null) return ai;
-    if (ai.gerado_por_ia === true) return { ...ai, correctness_score: 0 };
-    const constraint = outputConstraint(sub);
-    let score = ai.correctness_score;
-    if (constraint === "ERRO_EXECUCAO") score = Math.min(score, 25);
-    if (constraint === "OUTPUT_ERRADO") score = Math.min(score, 55);
-    return { ...ai, correctness_score: score };
-  });
+  results = await Promise.all(
+    results.map(async (ai) => {
+      const sub = submissions.find((s) => s.id === ai.id);
+      if (!sub) return ai;
+
+      const q = sub.question;
+      const cases = Array.isArray(q.testCases) ? q.testCases : null;
+
+      // Correção determinística por testes (Python/JS) quando a pergunta tem casos definidos.
+      // A taxa de certeza manda; o LLM fica só para o feedback qualitativo e o aviso de IA.
+      if (cases?.length && q.functionName && isTestSupported(q.language)) {
+        try {
+          const graded = await gradeAgainstCases(sub.studentCode, q.language, q.functionName, cases);
+          if (graded) {
+            return {
+              ...ai,
+              correctness_score: graded.score,
+              tests_passed: graded.passed,
+              tests_total: graded.total,
+            };
+          }
+        } catch (e) {
+          console.error(`Correção por testes falhou para submissão ${sub.id}:`, e.message);
+          // cai para o método do LLM em baixo
+        }
+      }
+
+      // Fallback: nota do LLM, com limites por correspondência de output.
+      // A suspeita de IA é só um aviso ao professor — não altera a nota de correção.
+      if (ai.correctness_score === null) return ai;
+      const constraint = outputConstraint(sub);
+      let score = ai.correctness_score;
+      if (constraint === "ERRO_EXECUCAO") score = Math.min(score, 25);
+      if (constraint === "OUTPUT_ERRADO") score = Math.min(score, 45);
+      return { ...ai, correctness_score: score };
+    })
+  );
 
   // Guarda na DB e notifica professor
   await Promise.all(
@@ -98,6 +126,8 @@ async function analyzeRoomSubmissions(roomId) {
           aiGeneratedByAi: ai.gerado_por_ia ?? false,
           aiCertaintyDegree: ai.grau_de_certeza ?? 0,
           aiReason: ai.motivo ?? null,
+          testsPassed: ai.tests_passed ?? null,
+          testsTotal: ai.tests_total ?? null,
         },
       }).catch(() => {});
 
@@ -111,6 +141,8 @@ async function analyzeRoomSubmissions(roomId) {
         geradoPorIa: ai.gerado_por_ia,
         grauDeCerteza: ai.grau_de_certeza,
         motivo: ai.motivo,
+        testsPassed: ai.tests_passed ?? null,
+        testsTotal: ai.tests_total ?? null,
       });
     })
   );

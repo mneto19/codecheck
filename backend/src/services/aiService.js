@@ -37,23 +37,23 @@ Independentemente da correção do código, analisa em profundidade se o código
   * Docstrings ou type hints não solicitados
 
 SCORING:
-- correctness_score: baseia-te na FASE 1. Penaliza fortemente componentes em falta.
+- correctness_score (0-100): baseia-te na FASE 1. Avalia APENAS a correção do código — de forma totalmente independente de qualquer suspeita de IA. Penaliza fortemente componentes em falta.
   * Output correto com código errado: máximo 40
   * Erro de execução: máximo 25
   * Código estruturalmente diferente mas output correto: máximo 50
-- gerado_por_ia: true/false baseado na FASE 2
+  * Output que não corresponde ao esperado (incompleto ou diferente da referência): penaliza — significa que o aluno não respondeu totalmente ao pedido
+- gerado_por_ia: true/false baseado na FASE 2. É um AVISO consultivo para o professor — NÃO influencia o correctness_score de forma alguma.
 - grau_de_certeza: 0-100. Sê conservador — só marca true se tiveres evidências concretas.
-- Se gerado_por_ia=true: correctness_score = 0 automaticamente
 
 IMPORTANTE: Todos os campos de texto (motivo, logic_differences, style_notes, summary) devem ser escritos em português de Portugal. Usa vocabulário e ortografia de Portugal (não do Brasil).
 
-Responde APENAS com um JSON array válido, sem markdown, sem texto extra.
+Responde APENAS com um objeto JSON válido, sem markdown, sem texto extra.
 
 Submissões:
 [${items}]
 
 Formato obrigatório:
-[{"id":"...","correctness_score":0,"gerado_por_ia":false,"grau_de_certeza":0,"motivo":"...","logic_differences":["..."],"style_notes":["..."],"summary":"..."}]
+{"results":[{"id":"...","correctness_score":0,"gerado_por_ia":false,"grau_de_certeza":0,"motivo":"...","logic_differences":["..."],"style_notes":["..."],"summary":"..."}]}
 
 motivo: indícios de IA encontrados ou "Sem indícios". Máx 200 caracteres, português de Portugal.
 summary: resumo da avaliação. Máx 120 caracteres, português de Portugal.
@@ -67,8 +67,9 @@ logic_differences e style_notes: frases curtas em português de Portugal.`;
         { role: "system", content: systemMessage },
         { role: "user", content: prompt },
       ],
-      temperature: 0.1,
+      temperature: 0,
       max_tokens: 3000,
+      response_format: { type: "json_object" },
     },
     {
       headers: {
@@ -83,7 +84,9 @@ logic_differences e style_notes: frases curtas em português de Portugal.`;
   const clean = text.replace(/```json|```/g, "").trim();
 
   try {
-    const results = JSON.parse(clean);
+    const parsed = JSON.parse(clean);
+    // JSON mode devolve um objeto {"results":[...]}; tolera também um array directo
+    const results = Array.isArray(parsed) ? parsed : parsed.results || [];
     return submissions.map((s) => {
       const r = results.find((res) => res.id === s.id);
       if (!r) return fallback(s.id);
@@ -108,4 +111,53 @@ function fallback(id) {
   };
 }
 
-module.exports = { compareCodeBatch };
+// A IA sugere APENAS os inputs; os outputs esperados são calculados depois correndo a referência.
+// Cada input é um array de argumentos pela ordem dos parâmetros da função.
+async function generateTestInputs({ promptText, language, referenceCode, functionName }) {
+  const systemMessage = `És um gerador de casos de teste para exercícios de programação.
+Geras apenas os INPUTS (argumentos) para testar uma função — nunca os outputs.
+Respondes sempre com JSON válido.`;
+
+  const prompt = `Função a testar: ${functionName} (linguagem: ${language})
+Enunciado: ${JSON.stringify(promptText || "")}
+Código de referência do professor:
+${referenceCode}
+
+Gera entre 5 e 8 conjuntos de argumentos para testar esta função, cobrindo casos normais e casos-limite (vazios, zero, negativos, repetidos, etc.) que façam sentido para o enunciado.
+EQUILÍBRIO: inclui uma mistura equilibrada de inputs que devem SATISFAZER a condição e inputs que NÃO a devem satisfazer. Se a função devolve True/False, mete aproximadamente metade de cada (ex: para palíndromos, tantos palíndromos como não-palíndromos). Não concentres os testes num só tipo de resultado — isso permite apanhar código que devolve sempre o mesmo valor.
+Cada conjunto é um array com os argumentos pela ordem dos parâmetros da função.
+Exemplos do formato: para uma função de 1 parâmetro → [["radar"], ["python"], [""]]; para 2 parâmetros → [[2,3],[10,-5]].
+Usa apenas valores JSON (strings, números, booleanos, arrays, null). Não incluas a chamada à função, só os argumentos.
+
+Responde APENAS com um objeto JSON: {"inputs": [[...], [...]]}`;
+
+  const response = await axios.post(
+    GROQ_URL,
+    {
+      model: "llama-3.3-70b-versatile",
+      messages: [
+        { role: "system", content: systemMessage },
+        { role: "user", content: prompt },
+      ],
+      temperature: 0.2,
+      max_tokens: 800,
+      response_format: { type: "json_object" },
+    },
+    {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+      },
+      timeout: 20000,
+    }
+  );
+
+  const text = response.data?.choices?.[0]?.message?.content || "";
+  const clean = text.replace(/```json|```/g, "").trim();
+  const parsed = JSON.parse(clean);
+  const inputs = Array.isArray(parsed) ? parsed : parsed.inputs || [];
+  // Garante que cada input é um array de argumentos
+  return inputs.filter((i) => Array.isArray(i));
+}
+
+module.exports = { compareCodeBatch, generateTestInputs };
