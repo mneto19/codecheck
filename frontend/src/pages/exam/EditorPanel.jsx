@@ -3,7 +3,15 @@ import { LANG_MAP } from "../../constants";
 
 const Editor = lazy(() => import("@monaco-editor/react"));
 
-export default function EditorPanel({ question, questionIndex, code, onChange, isFinished }) {
+export default function EditorPanel({ question, questionIndex, code, onChange, onPaste, isFinished }) {
+  function handleMount(editor) {
+    // Regista "paste" para deteção do uso de Ai
+    editor.onDidPaste((e) => {
+      const pasted = editor.getModel()?.getValueInRange(e.range) || "";
+      onPaste?.(pasted.length);
+    });
+  }
+
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       <div className="border-b border-ink-800 px-6 py-4 shrink-0">
@@ -27,6 +35,7 @@ export default function EditorPanel({ question, questionIndex, code, onChange, i
             language={LANG_MAP[question.language] || "python"}
             value={code}
             onChange={(v) => onChange(v || "")}
+            onMount={handleMount}
             theme="vs-dark"
             options={{
               minimap: { enabled: false },

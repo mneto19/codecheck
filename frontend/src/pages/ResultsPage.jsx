@@ -35,7 +35,7 @@ export default function ResultsPage() {
     joinChannel();
     socket.on("connect", joinChannel);
 
-    socket.on("submission:evaluated", ({ submissionId, score, summary, geradoPorIa, grauDeCerteza, motivo }) => {
+    socket.on("submission:evaluated", ({ submissionId, score, summary, geradoPorIa, grauDeCerteza, motivo, testsPassed, testsTotal }) => {
       setData((prev) => {
         if (!prev) return prev;
         return {
@@ -51,6 +51,8 @@ export default function ResultsPage() {
                     aiGeneratedByAi: geradoPorIa,
                     aiCertaintyDegree: grauDeCerteza,
                     aiReason: motivo,
+                    testsPassed,
+                    testsTotal,
                   }
                 : sub
             ),
@@ -101,7 +103,7 @@ export default function ResultsPage() {
     const questions = (students[0]?.submissions || [])
       .map((s) => s.question)
       .sort((a, b) => a.orderIndex - b.orderIndex);
-    const headers = ["Nº", "Nome", ...questions.map((_, i) => `P${i + 1}`), "Média", "IA?"];
+    const headers = ["Nº", "Nome", ...questions.map((_, i) => `P${i + 1}`), "Média", "IA?", "Colou?"];
     const rows = [...students]
       .sort((a, b) => (a.studentNumber || "").localeCompare(b.studentNumber || ""))
       .map((s) => {
@@ -109,12 +111,14 @@ export default function ResultsPage() {
         const subs = [...s.submissions].sort((a, b) => a.question.orderIndex - b.question.orderIndex);
         const hasIa = subs.some((sub) => sub.aiGeneratedByAi);
         const maxCert = Math.max(0, ...subs.map((sub) => sub.aiCertaintyDegree || 0));
+        const totalPastes = subs.reduce((a, sub) => a + (sub.pasteCount || 0), 0);
         return [
           s.studentNumber || "",
           s.nickname,
           ...questions.map((q) => subs.find((sub) => sub.question.id === q.id)?.aiCorrectnessScore ?? ""),
           avg ?? "",
           hasIa ? `Sim (${maxCert}%)` : "Não",
+          totalPastes > 0 ? `Sim (${totalPastes})` : "Não",
         ];
       });
     const csv = [headers, ...rows].map((r) => r.join(";")).join("\n");
@@ -179,6 +183,7 @@ export default function ResultsPage() {
                       ))}
                       <th className="text-center px-4 py-3 text-[#00c8ff] font-normal">Média</th>
                       <th className="text-center px-4 py-3 text-warn font-normal">IA?</th>
+                      <th className="text-center px-4 py-3 text-warn font-normal">Colou?</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -187,6 +192,7 @@ export default function ResultsPage() {
                       const sortedSubs = [...s.submissions].sort((a, b) => a.question.orderIndex - b.question.orderIndex);
                       const hasIa = sortedSubs.some(sub => sub.aiGeneratedByAi);
                       const maxCertainty = Math.max(0, ...sortedSubs.map(sub => sub.aiCertaintyDegree || 0));
+                      const totalPastes = sortedSubs.reduce((a, sub) => a + (sub.pasteCount || 0), 0);
                       return (
                         <tr key={s.id} className="border-b border-ink-800 hover:bg-ink-900/50 transition-colors">
                           <td className="px-4 py-3 text-ink-400">{s.studentNumber || "—"}</td>
@@ -217,6 +223,15 @@ export default function ResultsPage() {
                             {hasIa ? (
                               <span className="text-danger font-bold" title={`Certeza: ${maxCertainty}%`}>
                                 Sim ({maxCertainty}%)
+                              </span>
+                            ) : (
+                              <span className="text-ink-500">Não</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-3 text-center">
+                            {totalPastes > 0 ? (
+                              <span className="text-warn font-bold" title={`${totalPastes} colagem(ns) no total`}>
+                                Sim ({totalPastes})
                               </span>
                             ) : (
                               <span className="text-ink-500">Não</span>
@@ -384,6 +399,23 @@ export default function ResultsPage() {
                     </div>
                   </div>
 
+                  {/* Correção por testes (Python/JS) — nota determinística */}
+                  {subDetail.testsTotal > 0 && (
+                    <div className="mb-4 rounded-lg px-4 py-3 border border-[#00c8ff]/30 bg-[#00c8ff]/5">
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs font-mono uppercase tracking-widest font-bold text-[#00c8ff]">
+                          Correção por testes
+                        </p>
+                        <span className={`text-xs font-mono font-bold ${subDetail.testsPassed === subDetail.testsTotal ? "text-[#00c8ff]" : "text-warn"}`}>
+                          {subDetail.testsPassed}/{subDetail.testsTotal} testes
+                        </span>
+                      </div>
+                      <p className="text-ink-300 text-xs font-mono mt-2 leading-relaxed">
+                        Nota baseada na taxa de acerto dos testes (equivalência funcional), não no palpite da IA.
+                      </p>
+                    </div>
+                  )}
+
                   {/* Diferenças lógicas detetadas pela IA */}
                   {subDetail.aiLogicDifferences?.length > 0 && (
                     <div className="mb-4">
@@ -416,7 +448,24 @@ export default function ResultsPage() {
                     </div>
                   )}
 
-                  {/* Deteção de uso de IA */}
+                  {/* "Paste" detetado no editor durante o exame */}
+                  {subDetail.pasteCount > 0 && (
+                    <div className="rounded-lg px-4 py-3 border border-warn/40 bg-warn/5 mb-4">
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs font-mono uppercase tracking-widest font-bold text-warn">
+                          ⚠ Colagens detetadas
+                        </p>
+                        <span className="text-xs font-mono text-ink-500">
+                          {subDetail.pasteCount} {subDetail.pasteCount === 1 ? "colagem" : "colagens"} · {subDetail.pastedChars} caracteres
+                        </span>
+                      </div>
+                      <p className="text-ink-300 text-xs font-mono mt-2 leading-relaxed">
+                        O aluno colou código no editor — pode indicar uso de fontes externas.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Detetor do uso de IA */}
                   {subDetail.aiGeneratedByAi !== null && subDetail.aiGeneratedByAi !== undefined && (
                     <div className={`rounded-lg px-4 py-3 border ${subDetail.aiGeneratedByAi ? "border-danger/40 bg-danger/5" : "border-ink-700 bg-ink-900"}`}>
                       <div className="flex items-center justify-between">

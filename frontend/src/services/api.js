@@ -52,9 +52,10 @@ export const roomApi = {
 };
 
 export const questionApi = {
-  create: (data)     => api.post("/questions", data),
-  update: (id, data) => api.put(`/questions/${id}`, data),
-  delete: (id)       => api.delete(`/questions/${id}`),
+  create:        (data)     => api.post("/questions", data),
+  update:        (id, data) => api.put(`/questions/${id}`, data),
+  delete:        (id)       => api.delete(`/questions/${id}`),
+  generateTests: (data)     => api.post("/questions/generate-tests", data),
 };
 
 export const studentApi = {

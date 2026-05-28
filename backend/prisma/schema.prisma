@@ -60,6 +60,10 @@ model Question {
 
   referenceOutput String?  @map("reference_output")
 
+  // Correção por testes (equivalência funcional) — só Python/JS. testCases: [{ input: [...], expected: "..." }]
+  testCases    Json?   @map("test_cases")
+  functionName String? @map("function_name")
+
   room        Room         @relation(fields: [roomId], references: [id], onDelete: Cascade)
   submissions Submission[]
 
@@ -104,6 +108,10 @@ model Submission {
   aiGeneratedByAi      Boolean? @map("ai_generated_by_ai")
   aiCertaintyDegree    Int?     @map("ai_certainty_degree")
   aiReason             String?  @map("ai_reason")
+  pasteCount           Int?     @default(0) @map("paste_count")
+  pastedChars          Int?     @default(0) @map("pasted_chars")
+  testsPassed          Int?     @map("tests_passed")
+  testsTotal           Int?     @map("tests_total")
   submittedAt          DateTime @default(now()) @map("submitted_at")
 
   question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
