@@ -41,4 +41,24 @@ async function executeCode(sourceCode, language, stdin = "") {
   };
 }
 
-module.exports = { executeCode };
+// Usada pelo motor de correção por testes, que gere os erros caso a caso dentro do próprio harness.
+async function executeRaw(sourceCode, language, stdin = "") {
+  const lang = LANGUAGE_MAP[language] || LANGUAGE_MAP.PYTHON;
+
+  const response = await axios.post(
+    JDOODLE_URL,
+    {
+      clientId:     process.env.JDOODLE_CLIENT_ID,
+      clientSecret: process.env.JDOODLE_CLIENT_SECRET,
+      script:       sourceCode,
+      stdin,
+      language:     lang.language,
+      versionIndex: lang.versionIndex,
+    },
+    { timeout: 15000 }
+  );
+
+  return { output: response.data.output || "", statusCode: response.data.statusCode };
+}
+
+module.exports = { executeCode, executeRaw };

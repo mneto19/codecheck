@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useStudentStore } from "../store/authStore";
 import { useSocket } from "../hooks/useSocket";
@@ -25,6 +25,8 @@ export default function ExamPage() {
   const [results, setResults]       = useState({});
   const [submitting, setSubmitting] = useState({});
   const [examRoom, setExamRoom]     = useState(room);
+  const [pasteStats, setPasteStats] = useState({});
+  const activeQuestionIdRef         = useRef(null);
 
   const { formatted, remaining, expired } = useTimer(examRoom?.startedAt, examRoom?.timerSeconds);
 
@@ -35,6 +37,11 @@ export default function ExamPage() {
   useEffect(() => {
     if (!student || !token || !room) navigate("/join", { replace: true });
   }, [student, token, room, navigate]);
+
+  // Mantém o ref a apontar para a pergunta visível, para atribuir "pastes" corretamente
+  useEffect(() => {
+    activeQuestionIdRef.current = room?.questions?.[activeQuestion]?.id ?? null;
+  }, [room, activeQuestion]);
 
   // Restaura rascunhos guardados no localStorage entre refreshes
   useEffect(() => {
@@ -72,13 +79,30 @@ export default function ExamPage() {
     if (room) saveCode(codeKey(room.id, questionId), value);
   }
 
+  // Acumula colagens por pergunta. Estável (lê a pergunta ativa via ref) porque o
+  // handler do Monaco é registado uma só vez no mount do editor.
+  const handlePaste = useCallback((chars) => {
+    const qid = activeQuestionIdRef.current;
+    if (!qid) return;
+    setPasteStats((p) => {
+      const cur = p[qid] || { count: 0, chars: 0 };
+      return { ...p, [qid]: { count: cur.count + 1, chars: cur.chars + chars } };
+    });
+  }, []);
+
   async function handleSubmit(questionId) {
     const code = codes[questionId];
     if (!code?.trim()) return;
 
     setSubmitting((s) => ({ ...s, [questionId]: true }));
     try {
-      const res = await submissionApi.submit({ questionId, studentCode: code });
+      const stats = pasteStats[questionId] || { count: 0, chars: 0 };
+      const res = await submissionApi.submit({
+        questionId,
+        studentCode: code,
+        pasteCount: stats.count,
+        pastedChars: stats.chars,
+      });
       setResults((r) => ({ ...r, [questionId]: res.data }));
     } catch (err) {
       const msg = err.response?.data?.error || "Erro ao submeter. Tenta novamente.";
@@ -171,6 +195,7 @@ export default function ExamPage() {
                 questionIndex={activeQuestion}
                 code={codes[currentQ.id] || ""}
                 onChange={(v) => handleCodeChange(currentQ.id, v)}
+                onPaste={handlePaste}
                 isFinished={isFinished}
               />
               <SubmissionPanel
