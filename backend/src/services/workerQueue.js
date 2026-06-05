@@ -23,7 +23,7 @@ async function processJob(job) {
     io.to(`student:${studentId}`).emit("submission:result", {
       questionId,
       status: "Error",
-      output: `Erro ao executar código: ${e.message}`,
+      output: "Não foi possível executar o código. Tenta novamente ou contacta o professor.",
     });
     if (roomId) io.to(`teacher:${roomId}`).emit("submission:progress", {
       studentId, questionId, status: "Error",
