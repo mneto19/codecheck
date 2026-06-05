@@ -30,7 +30,7 @@ export default function RoomPage() {
   const [saving, setSaving] = useState(false);
   const [starting, setStarting] = useState(false);
 
-  // Correção por testes (só Python/JS): inputs gerados pela IA, outputs vindos da referência
+  // Correção por testes (só Python/JS): inputs criados pela IA, outputs vindos da referência
   const [genTests, setGenTests] = useState(null); // array de { inputText, expected } ou null
   const [functionName, setFunctionName] = useState(null);
   const [generating, setGenerating] = useState(false);
@@ -101,7 +101,7 @@ export default function RoomPage() {
     setGenError("");
   }
 
-  // Gera testes automaticamente: a IA sugere inputs, a referência dá os outputs esperados
+  // Cria testes automaticamente: a IA sugere inputs, a referência dá os outputs esperados
   async function handleGenerateTests() {
     setGenerating(true);
     setGenError("");
@@ -119,7 +119,7 @@ export default function RoomPage() {
         }))
       );
     } catch (err) {
-      setGenError(err.response?.data?.error || "Não foi possível gerar os testes.");
+      setGenError(err.response?.data?.error || "Não foi possível criar os testes.");
     } finally {
       setGenerating(false);
     }
@@ -185,7 +185,7 @@ export default function RoomPage() {
     setStarting(true);
     try {
       const res = await roomApi.start(id);
-      setRoom(res.data);
+      setRoom((r) => ({ ...r, ...res.data }));
     } finally {
       setStarting(false);
     }
@@ -195,7 +195,7 @@ export default function RoomPage() {
   async function handleFinish() {
     if (!confirm("Terminar o exame antecipadamente?")) return;
     const res = await roomApi.finish(id);
-    setRoom(res.data);
+    setRoom((r) => ({ ...r, ...res.data }));
   }
 
   if (loading) {
@@ -334,7 +334,7 @@ export default function RoomPage() {
                         loading={generating}
                         disabled={!qForm.promptText.trim() || !qForm.referenceCode.trim()}
                       >
-                        {genTests ? "Regenerar testes" : "Gerar testes automaticamente"}
+                        {genTests ? "Recriar testes" : "Criar testes automaticamente"}
                       </Button>
                     )}
                   </div>
@@ -345,7 +345,7 @@ export default function RoomPage() {
                     </p>
                   ) : (
                     <p className="text-ink-500 font-mono text-xs">
-                      A IA sugere os inputs; os resultados esperados saem do teu código de referência. Podes editar ou apagar antes de guardar — se não gerares nada, a nota fica a cargo da IA.
+                      A IA sugere os inputs; os resultados esperados saem do teu código de referência. Podes editar ou apagar antes de guardar — se não criares nada, a nota fica a cargo da IA.
                     </p>
                   )}
 

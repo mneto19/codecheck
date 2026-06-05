@@ -114,8 +114,8 @@ function fallback(id) {
 // A IA sugere APENAS os inputs; os outputs esperados são calculados depois correndo a referência.
 // Cada input é um array de argumentos pela ordem dos parâmetros da função.
 async function generateTestInputs({ promptText, language, referenceCode, functionName }) {
-  const systemMessage = `És um gerador de casos de teste para exercícios de programação.
-Geras apenas os INPUTS (argumentos) para testar uma função — nunca os outputs.
+  const systemMessage = `És um criador de casos de teste para exercícios de programação.
+Crias apenas os INPUTS (argumentos) para testar uma função — nunca os outputs.
 Respondes sempre com JSON válido.`;
 
   const prompt = `Função a testar: ${functionName} (linguagem: ${language})

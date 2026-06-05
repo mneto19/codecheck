@@ -23,7 +23,7 @@ const questionSchema = z.object({
 
 const updateSchema = questionSchema.partial().omit({ roomId: true });
 
-// Geração automática de testes (a partir do enunciado + referência)
+// Criação automática de testes (a partir do enunciado + referência)
 const generateTestsSchema = z.object({
   promptText: z.string().min(1).max(5000),
   referenceCode: z.string().min(1).max(20000),
