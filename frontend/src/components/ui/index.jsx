@@ -76,9 +76,24 @@ export function Spinner() {
 }
 
 export function ScoreRing({ score }) {
-  const color = score >= 80 ? "#00c8ff" : score >= 50 ? "#ff6b35" : "#ff3355";
   const r = 28;
   const circ = 2 * Math.PI * r;
+
+  if (score === null || score === undefined) {
+    return (
+      <div className="flex flex-col items-center gap-1 shrink-0">
+        <svg width="72" height="72" viewBox="0 0 72 72">
+          <circle cx="36" cy="36" r={r} fill="none" stroke="#21212d" strokeWidth="6" />
+          <text x="36" y="41" textAnchor="middle" fill="#555570" fontSize="14" fontFamily="JetBrains Mono" fontWeight="700">
+            —
+          </text>
+        </svg>
+        <span className="text-xs text-ink-400 font-mono">/ 100</span>
+      </div>
+    );
+  }
+
+  const color = score >= 80 ? "#00c8ff" : score >= 50 ? "#ff6b35" : "#ff3355";
   const dash = (score / 100) * circ;
 
   return (
