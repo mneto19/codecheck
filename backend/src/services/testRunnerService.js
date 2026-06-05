@@ -96,7 +96,7 @@ async function runCases(code, language, fn, inputs) {
   return parseOutputs(output, inputs.length);
 }
 
-// Calcula os outputs esperados correndo a REFERÊNCIA do professor com os inputs gerados.
+// Calcula os outputs esperados correndo a REFERÊNCIA do professor com os inputs criados.
 // Descarta inputs onde a própria referência rebenta (input inválido) — assim a IA nunca
 // define uma "resposta certa" errada; o esperado vem sempre do código de confiança.
 async function computeExpectedFromReference(referenceCode, language, fn, inputs) {

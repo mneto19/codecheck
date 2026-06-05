@@ -470,7 +470,7 @@ export default function ResultsPage() {
                     <div className={`rounded-lg px-4 py-3 border ${subDetail.aiGeneratedByAi ? "border-danger/40 bg-danger/5" : "border-ink-700 bg-ink-900"}`}>
                       <div className="flex items-center justify-between">
                         <p className={`text-xs font-mono uppercase tracking-widest font-bold ${subDetail.aiGeneratedByAi ? "text-danger" : "text-ink-400"}`}>
-                          {subDetail.aiGeneratedByAi ? "⚠ Suspeito de gerado por IA" : "Sem indícios de IA"}
+                          {subDetail.aiGeneratedByAi ? "⚠ Suspeito de criado por IA" : "Sem indícios de IA"}
                         </p>
                         <span className="text-xs font-mono text-ink-500">
                           Certeza: {subDetail.aiCertaintyDegree ?? 0}%

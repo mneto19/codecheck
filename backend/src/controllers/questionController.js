@@ -111,14 +111,14 @@ async function generateTests(req, res, next) {
     const inputs = await generateTestInputs({ promptText, language, referenceCode, functionName });
     if (!inputs.length) {
       return res.status(422).json({
-        error: "A IA não conseguiu gerar inputs. Tenta novamente ou adiciona testes manualmente.",
+        error: "A IA não conseguiu criar inputs. Tenta novamente ou adiciona testes manualmente.",
       });
     }
 
     const testCases = await computeExpectedFromReference(referenceCode, language, functionName, inputs);
     if (!testCases.length) {
       return res.status(422).json({
-        error: "A referência não produziu resultados válidos para os inputs gerados.",
+        error: "A referência não produziu resultados válidos para os inputs criados.",
       });
     }
 
