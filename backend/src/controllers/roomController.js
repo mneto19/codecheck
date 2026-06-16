@@ -64,13 +64,33 @@ async function analyzeRoomSubmissions(roomId) {
     if (seen?.referenceOutput) s.question.referenceOutput = seen.referenceOutput;
   }
 
-  function outputConstraint(s) {
-    const studentOut = (s.executionOutput || "").trim();
-    const refOut = (s.question.referenceOutput || "").trim();
-    if (s.executionError) return "ERRO_EXECUCAO";
-    if (!studentOut) return "SEM_OUTPUT";
-    if (studentOut === refOut) return "OUTPUT_CORRETO";
-    return "OUTPUT_ERRADO";
+  // ---- Correção por testes (executada ANTES da análise da IA) ----
+  // Corre a função de cada aluno com inputs controlados e compara com o esperado
+  // (calculado a partir da referência). É o sinal FIÁVEL de correção funcional —
+  // ao contrário de comparar o stdout em bruto, que é enganador porque o aluno
+  // escreve os seus próprios prints de demonstração (valores de exemplo diferentes).
+  const testBySubmission = new Map();
+  await Promise.all(
+    submissions.map(async (sub) => {
+      const q = sub.question;
+      const cases = Array.isArray(q.testCases) ? q.testCases : null;
+      if (cases?.length && q.functionName && isTestSupported(q.language)) {
+        try {
+          const graded = await gradeAgainstCases(sub.studentCode, q.language, q.functionName, cases);
+          if (graded) testBySubmission.set(sub.id, graded);
+        } catch (e) {
+          console.error(`Correção por testes falhou para submissão ${sub.id}:`, e.message);
+        }
+      }
+    })
+  );
+
+  // Resumo da verificação por testes — enviado à IA como sinal de correção.
+  function testSummary(sub) {
+    const graded = testBySubmission.get(sub.id);
+    if (graded) return `${graded.passed}/${graded.total} testes automáticos passaram`;
+    if (sub.executionError) return "o código rebentou ao executar (erro de runtime)";
+    return "sem testes automáticos disponíveis";
   }
 
   let results;
@@ -85,7 +105,7 @@ async function analyzeRoomSubmissions(roomId) {
         studentCode: s.studentCode,
         executionOutput: s.executionOutput || "",
         executionError: s.executionError || "",
-        outputConstraint: outputConstraint(s),
+        testSummary: testSummary(s),
       }))
     );
   } catch (e) {
@@ -99,38 +119,27 @@ async function analyzeRoomSubmissions(roomId) {
     }));
   }
 
-  results = await Promise.all(
-    results.map(async (ai) => {
-      const sub = submissions.find((s) => s.id === ai.id);
-      if (!sub) return ai;
+  // Cap determinístico: os testes mandam. Quando todos passam não há cap (a nota da
+  // IA fica intacta); quando falham alguns, limita proporcionalmente. Sem testes,
+  // só limita se o código rebentou mesmo ao executar.
+  results = results.map((ai) => {
+    const sub = submissions.find((s) => s.id === ai.id);
+    if (!sub) return ai;
 
-      const q = sub.question;
-      const cases = Array.isArray(q.testCases) ? q.testCases : null;
+    const graded = testBySubmission.get(sub.id);
+    const testResults = graded ? { tests_passed: graded.passed, tests_total: graded.total } : null;
 
-      // Test cases: apenas informativo para o professor, sem impacto na nota.
-      let testResults = null;
-      if (cases?.length && q.functionName && isTestSupported(q.language)) {
-        try {
-          const graded = await gradeAgainstCases(sub.studentCode, q.language, q.functionName, cases);
-          if (graded) testResults = { tests_passed: graded.passed, tests_total: graded.total };
-        } catch (e) {
-          console.error(`Correção por testes falhou para submissão ${sub.id}:`, e.message);
-        }
-      }
+    if (ai.correctness_score === null) return { ...ai, ...testResults };
 
-      // Nota sempre baseada na análise da IA, com caps por correspondência de output.
-      if (ai.correctness_score === null) return { ...ai, ...testResults };
-      const constraint = outputConstraint(sub);
-      let score = ai.correctness_score;
-      if (constraint === "ERRO_EXECUCAO") score = Math.min(score, 25);
-      if (constraint === "OUTPUT_ERRADO") score = Math.min(score, 45);
-      if (constraint === "SEM_OUTPUT") {
-        const refOut = (sub.question.referenceOutput || "").trim();
-        if (refOut && refOut !== "(sem output)") score = Math.min(score, 60);
-      }
-      return { ...ai, correctness_score: score, ...testResults };
-    })
-  );
+    let score = ai.correctness_score;
+    if (graded && graded.total > 0) {
+      const testCap = Math.round((graded.passed / graded.total) * 100);
+      score = Math.min(score, testCap);
+    } else if (sub.executionError) {
+      score = Math.min(score, 25);
+    }
+    return { ...ai, correctness_score: score, ...testResults };
+  });
 
   // Guarda na DB e notifica professor
   await Promise.all(

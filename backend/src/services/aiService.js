@@ -6,7 +6,7 @@ async function compareCodeBatch(submissions) {
   const items = submissions
     .map(
       (s) =>
-        `{"id":"${s.id}","lang":"${s.language}","enunciado":${JSON.stringify(s.promptText || "")},"ref":${JSON.stringify(s.referenceCode)},"ref_output":${JSON.stringify(s.referenceOutput || "")},"code":${JSON.stringify(s.studentCode)},"student_output":${JSON.stringify(s.executionOutput || "")},"error":${JSON.stringify(s.executionError || "")},"constraint":"${s.outputConstraint || "SEM_OUTPUT"}"}`
+        `{"id":"${s.id}","lang":"${s.language}","enunciado":${JSON.stringify(s.promptText || "")},"ref":${JSON.stringify(s.referenceCode)},"ref_output":${JSON.stringify(s.referenceOutput || "")},"code":${JSON.stringify(s.studentCode)},"student_output":${JSON.stringify(s.executionOutput || "")},"error":${JSON.stringify(s.executionError || "")},"verificacao":${JSON.stringify(s.testSummary || "sem testes automáticos disponíveis")}}`
     )
     .join(",\n");
 
@@ -23,8 +23,9 @@ Lê primeiro o enunciado ("enunciado") para perceber o que era pedido ao aluno.
 Compara linha a linha o código do aluno ("code") com o código do professor ("ref").
 Identifica todos os componentes lógicos do código de referência (estruturas, algoritmos, condições, chamadas).
 Verifica quais estão presentes, ausentes ou implementados de forma diferente no código do aluno.
-O output ("student_output" vs "ref_output") é apenas um sinal adicional — NÃO é determinante.
-Um output correto com código errado ou plagiado NÃO merit nota alta.
+ATENÇÃO ao output: o "student_output" é apenas o que os prints de demonstração do aluno imprimiram e pode diferir do "ref_output" só porque o aluno usou valores de exemplo diferentes. Uma diferença de output causada por prints próprios NÃO é erro e NÃO deve ser penalizada.
+O sinal FIÁVEL de correção funcional é o campo "verificacao" (resultado dos testes automáticos).
+Um código plagiado ou que não resolve o enunciado NÃO merece nota alta, mesmo que os testes passem.
 
 FASE 2 — DETEÇÃO DE IA (análise obrigatória para TODAS as submissões):
 Independentemente da correção do código, analisa em profundidade se o código tem indícios de ser gerado por IA:
@@ -37,11 +38,12 @@ Independentemente da correção do código, analisa em profundidade se o código
   * Docstrings ou type hints não solicitados
 
 SCORING:
-- correctness_score (0-100): baseia-te na FASE 1. Avalia APENAS a correção do código — de forma totalmente independente de qualquer suspeita de IA. Penaliza fortemente componentes em falta.
-  * Output correto com código errado: máximo 40
-  * Erro de execução: máximo 25
-  * Código estruturalmente diferente mas output correto: máximo 50
-  * Output que não corresponde ao esperado (incompleto ou diferente da referência): penaliza — significa que o aluno não respondeu totalmente ao pedido
+- correctness_score (0-100): baseia-te na FASE 1 (qualidade e correção da lógica) e no campo "verificacao". Avalia a correção de forma independente de qualquer suspeita de IA.
+  * Se os testes automáticos passaram TODOS: o código está funcionalmente correto — atribui nota alta e foca-te na qualidade da estrutura/lógica.
+  * Se passaram apenas ALGUNS: penaliza proporcionalmente aos que falharam.
+  * Se o código rebentou ao executar (erro de runtime): máximo 25.
+  * Se NÃO há testes automáticos: avalia pela lógica do código face à referência; NÃO penalizes só por o output impresso diferir do da referência.
+  * Código plagiado ou que não resolve o enunciado: nota baixa mesmo que o output ou os testes pareçam corretos.
 - gerado_por_ia: true/false baseado na FASE 2. É um AVISO consultivo para o professor — NÃO influencia o correctness_score de forma alguma.
 - grau_de_certeza: 0-100. Sê conservador — só marca true se tiveres evidências concretas.
 
@@ -126,7 +128,7 @@ ${referenceCode}
 Gera entre 5 e 8 conjuntos de argumentos para testar esta função, cobrindo casos normais e casos-limite (vazios, zero, negativos, repetidos, etc.) que façam sentido para o enunciado.
 EQUILÍBRIO: inclui uma mistura equilibrada de inputs que devem SATISFAZER a condição e inputs que NÃO a devem satisfazer. Se a função devolve True/False, mete aproximadamente metade de cada (ex: para palíndromos, tantos palíndromos como não-palíndromos). Não concentres os testes num só tipo de resultado — isso permite apanhar código que devolve sempre o mesmo valor.
 Cada conjunto é um array com os argumentos pela ordem dos parâmetros da função.
-Exemplos do formato: para uma função de 1 parâmetro → [["radar"], ["python"], [""]]; para 2 parâmetros → [[2,3],[10,-5]].
+Exemplos do formato: para uma função de 1 parâmetro escalar → [["radar"], ["python"], [""]]; para 2 parâmetros → [[2,3],[10,-5]]; para uma função cujo ÚNICO parâmetro é uma LISTA → [[[3,1,2]], [[5,5,8]], [[]]] (repara no duplo colchete: cada input é um array de argumentos e o único argumento é, ele próprio, a lista — nunca espalhes os elementos da lista como argumentos separados).
 Usa apenas valores JSON (strings, números, booleanos, arrays, null). Não incluas a chamada à função, só os argumentos.
 
 Responde APENAS com um objeto JSON: {"inputs": [[...], [...]]}`;
