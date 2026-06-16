@@ -8,12 +8,28 @@ const { executeCode } = require("../services/codeExecutionService");
 const { isTestSupported, gradeAgainstCases } = require("../services/testRunnerService");
 
 async function analyzeRoomSubmissions(roomId) {
-  const submissions = await prisma.submission.findMany({
+  let submissions = await prisma.submission.findMany({
     where: { question: { roomId } },
     include: { student: true, question: true },
   });
 
   if (submissions.length === 0) return;
+
+  // Aguardar que todas as execuções do workerQueue terminem antes de analisar
+  const submissionIds = submissions.map((s) => s.id);
+  const deadline = Date.now() + 45000;
+  while (Date.now() < deadline) {
+    const pending = await prisma.submission.count({
+      where: { id: { in: submissionIds }, executionStatus: { in: ["Pending", "Queued"] } },
+    });
+    if (pending === 0) break;
+    await new Promise((r) => setTimeout(r, 1500));
+  }
+  // Re-fetch com executionOutput atualizado após execuções terminarem
+  submissions = await prisma.submission.findMany({
+    where: { question: { roomId } },
+    include: { student: true, question: true },
+  });
 
   const io = getIO();
 
@@ -32,9 +48,20 @@ async function analyzeRoomSubmissions(roomId) {
         s.question.referenceOutput = refOutput;
       } catch (e) {
         console.error(`Execução de referência falhou para pergunta ${s.questionId}:`, e.message);
-        s.question.referenceOutput = "(erro ao executar referência)";
+        const fallback = "(erro ao executar referência)";
+        await prisma.question.update({
+          where: { id: s.questionId },
+          data: { referenceOutput: fallback },
+        }).catch(() => {});
+        s.question.referenceOutput = fallback;
       }
     }
+  }
+
+  // Propagar referenceOutput a todos os submissions da mesma pergunta
+  for (const s of submissions) {
+    const seen = questionsSeen.get(s.questionId);
+    if (seen?.referenceOutput) s.question.referenceOutput = seen.referenceOutput;
   }
 
   function outputConstraint(s) {
