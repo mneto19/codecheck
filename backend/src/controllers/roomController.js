@@ -80,33 +80,28 @@ async function analyzeRoomSubmissions(roomId) {
       const q = sub.question;
       const cases = Array.isArray(q.testCases) ? q.testCases : null;
 
-      // Correção determinística por testes (Python/JS) quando a pergunta tem casos definidos.
-      // A taxa de certeza manda; o LLM fica só para o feedback qualitativo e o aviso de IA.
+      // Test cases: apenas informativo para o professor, sem impacto na nota.
+      let testResults = null;
       if (cases?.length && q.functionName && isTestSupported(q.language)) {
         try {
           const graded = await gradeAgainstCases(sub.studentCode, q.language, q.functionName, cases);
-          if (graded) {
-            return {
-              ...ai,
-              correctness_score: graded.score,
-              tests_passed: graded.passed,
-              tests_total: graded.total,
-            };
-          }
+          if (graded) testResults = { tests_passed: graded.passed, tests_total: graded.total };
         } catch (e) {
           console.error(`Correção por testes falhou para submissão ${sub.id}:`, e.message);
-          // cai para o método do LLM em baixo
         }
       }
 
-      // Fallback: nota do LLM, com limites por correspondência de output.
-      // A suspeita de IA é só um aviso ao professor — não altera a nota de correção.
-      if (ai.correctness_score === null) return ai;
+      // Nota sempre baseada na análise da IA, com caps por correspondência de output.
+      if (ai.correctness_score === null) return { ...ai, ...testResults };
       const constraint = outputConstraint(sub);
       let score = ai.correctness_score;
       if (constraint === "ERRO_EXECUCAO") score = Math.min(score, 25);
       if (constraint === "OUTPUT_ERRADO") score = Math.min(score, 45);
-      return { ...ai, correctness_score: score };
+      if (constraint === "SEM_OUTPUT") {
+        const refOut = (sub.question.referenceOutput || "").trim();
+        if (refOut && refOut !== "(sem output)") score = Math.min(score, 60);
+      }
+      return { ...ai, correctness_score: score, ...testResults };
     })
   );
 
